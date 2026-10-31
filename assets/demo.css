@@ -1,0 +1,10 @@
+#demoBanner{height:42px;display:flex;align-items:center;gap:16px;padding:0 20px;background:#fff7e8;border-bottom:1px solid #f3d39b;color:#7b4a00;font:12px system-ui;position:fixed;top:0;left:0;right:0;z-index:10000}
+#demoBanner strong{white-space:nowrap;font-size:13px}
+#demoBanner span{flex:1}
+#demoBanner a{color:inherit;white-space:nowrap}
+#demoBanner button{border:1px solid #d4b478;background:#fff;border-radius:5px;padding:4px 10px;color:inherit;cursor:pointer;white-space:nowrap}
+body{padding-top:42px;box-sizing:border-box}
+.app,.sidebar{height:calc(100vh - 42px)}
+.demo-unavailable{cursor:not-allowed!important;opacity:.48!important}
+.demo-note{padding:10px 14px;background:#fff7e8;color:#7b4a00;border:1px solid #f3d39b;border-radius:6px;margin-bottom:12px;font-size:12px;line-height:1.7}
+@media(max-width:850px){#demoBanner span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}}

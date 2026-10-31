@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent 中台 · 脱敏演示</title>
+<link rel="stylesheet" href="./assets/console.css">
+<link rel="stylesheet" href="./assets/demo.css">
+</head>
+<body>
+<aside id="demoBanner"><strong>脱敏演示</strong><span>虚构示例 · 数据仅存于当前浏览器 · 模型调用、企业登录、审核与发布未接入</span><a href="./guide.html">使用说明</a><button id="demoReset" type="button">重置示例</button></aside>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <div class="brand-txt">Agent 中台</div>
+        <div class="brand-sub">Orchestration Console</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-group">工作台</div>
+      <div class="nav-item active" data-view="overview">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span>概览</span>
+      </div>
+      <div class="nav-item" data-href="./review.html">
+        <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 9l2 2 4-4M8 15h8"/></svg>
+        <span>审核工作台</span><span class="nav-count" id="reviewPendingCount" hidden>—</span>
+      </div>
+
+      <div class="nav-group">Agent 开发</div>
+      <div class="nav-item" data-view="govern">
+        <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4-3 6.5-7 8-4-1.5-7-4-7-8V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+        <span>Agent 治理</span>
+      </div>
+      <div class="nav-item" data-view="builder">
+        <svg viewBox="0 0 24 24"><path d="M5 4h14v11H9l-4 4z"/><path d="M8 8h8M8 11h5"/><path d="M18 17v4M16 19h4"/></svg>
+        <span>Agent 搭建助手</span>
+      </div>
+      <div class="nav-item" data-view="canvas">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="5" rx="1.5"/><rect x="15" y="15" width="6" height="5" rx="1.5"/><path d="M9 6.5h4a2 2 0 0 1 2 2v9"/></svg>
+        <span>编排画布</span>
+      </div>
+      <div class="nav-item" data-view="trigger">
+        <svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M4.2 7.5l3.5 2M16.3 14l3.5 2M4.2 16.5l3.5-2M16.3 10l3.5-2"/><circle cx="12" cy="12" r="4"/></svg>
+        <span>触发器</span>
+      </div>
+
+      <div class="nav-group">能力与资源</div>
+      <div class="nav-item" data-view="skill">
+        <svg viewBox="0 0 24 24"><path d="M7 4h10v5H7zM4 15h6v5H4zM14 15h6v5h-6z"/><path d="M12 9v3M7 12h10M7 12v3M17 12v3"/></svg>
+        <span>技能与工具</span>
+      </div>
+      <div class="nav-item" data-view="knowledge">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+        <span>知识库</span>
+      </div>
+      <div class="nav-item" data-view="prompt">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 11h10M4 16h13M4 21h7"/></svg>
+        <span>Prompt 模板</span>
+      </div>
+      <div class="nav-item" data-view="model">
+        <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h5M8 16h8"/><circle cx="17" cy="12" r="2"/></svg>
+        <span>模型管理</span>
+      </div>
+      <div class="nav-item" data-view="node">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="6" rx="1.5"/><rect x="14" y="14" width="7" height="6" rx="1.5"/><path d="M10 7h3a4 4 0 0 1 4 4v3"/></svg>
+        <span>节点目录</span>
+      </div>
+      <div class="nav-item" data-view="contract">
+        <svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h4"/></svg>
+        <span>契约管理</span>
+      </div>
+      <div class="nav-item" data-view="review-template">
+        <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h5M8 16h8"/><path d="M16 14l2 2 3-4"/></svg>
+        <span>审核模板</span>
+      </div>
+
+      <div class="nav-group">测试与运行</div>
+      <div class="nav-item" data-view="trace">
+        <svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h16M4 18h7"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="18" r="2"/></svg>
+        <span>运行追踪</span>
+      </div>
+      <div class="nav-item" data-view="evaluation">
+        <svg viewBox="0 0 24 24"><path d="M5 3h14v18H5z"/><path d="M8 8l2 2 3-3M8 15h8M14 9h2"/></svg>
+        <span>评测与发布门禁</span>
+      </div>
+      <div class="nav-item" data-view="context">
+        <svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+        <span>上下文调试</span>
+      </div>
+      <div class="nav-item" data-view="obs">
+        <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+        <span>可观测性</span>
+      </div>
+
+      <div class="nav-group">平台管理</div>
+      <div class="nav-item" data-view="project">
+        <svg viewBox="0 0 24 24"><path d="M3 7h7l2 2h9v11H3z"/><path d="M3 7V4h7l2 3"/></svg>
+        <span>项目管理</span>
+      </div>
+      <div class="nav-item" data-view="credential">
+        <svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M17 12v3M20 12v2"/></svg>
+        <span>凭证管理</span>
+      </div>
+      <div class="nav-item" data-view="account">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 20c.7-4 3-6 7-6s6.3 2 7 6"/><path d="M18 4l2 1v3"/></svg>
+        <span>账号与权限</span>
+      </div>
+      <div class="nav-item" data-view="capabilities">
+        <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5M8 17h7"/></svg>
+        <span>平台能力</span>
+      </div>
+      <div class="nav-item" data-href="./guide.html">
+        <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5M8 17h7"/></svg>
+        <span>演示使用说明</span>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="crumb">Agent 中台 / <select class="crumb-sel" id="agentSel" title="切换 Agent" onchange="switchAgent(this.value)"></select> / <span class="crumb-v" id="agentVer">v3</span><span class="crumb-st" id="agentSt"></span></div>
+      <span class="pill dev">dev</span>
+      <div class="spacer"></div>
+      <span class="trace-chip mono" id="topTrace">trace demo-trace-example</span>
+      <span class="card-s" id="authName"></span>
+      <div class="avatar" id="authAvatar" title="账号与权限" onclick="go('account')" style="cursor:pointer">—</div>
+    </header>
+
+    <div class="views">
+      <!-- OVERVIEW -->
+      <section class="view active" id="view-overview">
+        <div class="page-h">
+          <div><div class="page-t">运行概览</div><div class="page-s">当前 Agent 近 24 小时运行态势与全平台待处理事项 · <span class="overview-updated" id="overviewUpdated">等待刷新</span></div></div>
+          <div class="overview-head-actions">
+            <button class="btn" onclick="openWizard('agent')">新建 Agent</button>
+            <button class="btn primary" onclick="go('canvas')">打开编排</button>
+            <button class="btn" id="overviewRefreshBtn" onclick="refreshSummary(true)">刷新</button>
+          </div>
+        </div>
+
+        <div class="overview-kpis">
+          <div class="card kpi"><div class="kpi-l" id="ovRunsL">24h 运行 · 当前 Agent</div><div class="kpi-v" id="ovRuns">—</div><div class="kpi-d" id="ovTok">—</div></div>
+          <div class="card kpi"><div class="kpi-l">成功率</div><div class="kpi-v" id="ovSucc">—</div><div class="kpi-d" id="ovSuccD">—</div></div>
+          <div class="card kpi"><div class="kpi-l">p95 延迟</div><div class="kpi-v" id="ovP95">—</div><div class="kpi-d" id="ovP95D">—</div></div>
+          <div class="card kpi"><div class="kpi-l">队列任务</div><div class="kpi-v" id="ovQueue">—</div><div class="kpi-d" id="ovQueueD">—</div></div>
+          <div class="card kpi"><div class="kpi-l">待人工审核</div><div class="kpi-v" id="ovReviews">—</div><div class="kpi-d" id="ovReviewsD">—</div></div>
+          <div class="card kpi"><div class="kpi-l">失败运行</div><div class="kpi-v" id="ovFailures">—</div><div class="kpi-d" id="ovFailuresD">—</div></div>
+        </div>
+
+        <div class="card env-overview">
+          <div class="card-h">
+            <div><div class="card-t">运行环境</div><div class="card-s">平台依赖与执行引擎实时状态</div></div>
+            <button class="btn sm" id="envRefreshBtn" onclick="probe(true)">刷新状态</button>
+          </div>
+          <div class="env-status-grid">
+            <div class="env-status-item"><div class="env-status-label">Engine</div><span class="env-status-value mono" id="envEngine">检测中…</span></div>
+            <div class="env-status-item"><div class="env-status-label">LLM</div><span class="env-status-value mono" id="envLlm">检测中…</span></div>
+            <div class="env-status-item"><div class="env-status-label">Milvus</div><span class="env-status-value mono" id="envMilvus">检测中…</span></div>
+            <div class="env-status-item"><div class="env-status-label">Redis</div><span class="env-status-value mono" id="envRedis">检测中…</span></div>
+            <div class="env-status-item"><div class="env-status-label">Encoder</div><span class="env-status-value mono" id="envEncoder">检测中…</span></div>
+            <div class="env-status-item"><div class="env-status-label">Reranker</div><span class="env-status-value mono" id="envReranker">检测中…</span></div>
+            <div class="env-status-item"><div class="env-status-label">MySQL</div><span class="env-status-value mono" id="envStorage">检测中…</span></div>
+            <div class="env-status-item"><div class="env-status-label">Nacos</div><span class="env-status-value mono" id="envNacos">检测中…</span></div>
+            <div class="env-status-item"><div class="env-status-label">Worker</div><span class="env-status-value mono" id="envWorker">检测中…</span></div>
+          </div>
+        </div>
+
+        <div class="overview-grid">
+          <div class="card">
+            <div class="card-h"><div><div class="card-t">待处理事项</div><div class="card-s" id="overviewActionSub">聚合审核、运行、评测与运行资源异常</div></div><button class="btn sm" onclick="go('trace')">运行追踪</button></div>
+            <div class="overview-list" id="overviewActions"><div class="overview-empty">正在读取待办…</div></div>
+          </div>
+
+          <div class="card">
+            <div class="card-h"><div><div class="card-t">队列与 Worker</div><div class="card-s" id="overviewRuntimeSub">实时执行资源</div></div><button class="btn sm" onclick="go('obs')">查看监控</button></div>
+            <div class="overview-runtime">
+              <div class="overview-runtime-item"><div class="overview-runtime-label">队列深度</div><div class="overview-runtime-value" id="overviewQueueDepth">—</div></div>
+              <div class="overview-runtime-item"><div class="overview-runtime-label">最老等待</div><div class="overview-runtime-value" id="overviewQueueOldest">—</div></div>
+              <div class="overview-runtime-item"><div class="overview-runtime-label">在线 Worker</div><div class="overview-runtime-value" id="overviewWorkerOnline">—</div></div>
+              <div class="overview-runtime-item"><div class="overview-runtime-label">负载 / 容量</div><div class="overview-runtime-value" id="overviewWorkerLoad">—</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="overview-grid equal">
+          <div class="card">
+            <div class="card-h"><div><div class="card-t">Agent 健康排行</div><div class="card-s">全平台近 24 小时，异常优先</div></div><button class="btn sm" onclick="go('obs')">详细趋势</button></div>
+            <div class="overview-table-wrap"><table><thead><tr><th>Agent</th><th>运行</th><th>成功率</th><th>P95</th><th>失败</th><th>状态</th></tr></thead><tbody id="overviewAgentHealth"><tr><td colspan="6"><div class="overview-empty">正在统计…</div></td></tr></tbody></table></div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div><div class="card-t">最近失败</div><div class="card-s" id="overviewFailureSub">近 24 小时</div></div><button class="btn sm" onclick="go('trace')">全部记录</button></div>
+            <div class="overview-table-wrap"><table><thead><tr><th>时间</th><th>Agent / Run</th><th>错误</th></tr></thead><tbody id="overviewRecentFailures"><tr><td colspan="3"><div class="overview-empty">正在读取…</div></td></tr></tbody></table></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><div><div class="card-t">评测与发布状态</div><div class="card-s" id="overviewReleaseSub">最近评测门禁与触发器状态</div></div><button class="btn sm" onclick="go('evaluation')">评测中心</button></div>
+          <div class="overview-list" id="overviewReleases"><div class="overview-empty">正在读取发布状态…</div></div>
+        </div>
+      </section>
+
+      <!-- CAPABILITY CATALOG -->
+      <section class="view" id="view-capabilities">
+        <div class="page-h">
+          <div><div class="page-t">能力清单</div><div class="page-s">本脱敏版本可体验的范围与后端接入边界</div></div>
+          <button class="btn" onclick="renderCapabilityCatalog()">刷新清单</button>
+        </div>
+        <div class="cap-summary">
+          <div class="card kpi"><div class="kpi-l">本地可体验</div><div class="kpi-v" id="capReadyCount">—</div><div class="kpi-d">支持本地交互</div></div>
+          <div class="card kpi"><div class="kpi-l">界面预览</div><div class="kpi-v" id="capConditionalCount">—</div><div class="kpi-d">仅保留原型页面</div></div>
+          <div class="card kpi"><div class="kpi-l">未接入</div><div class="kpi-v" id="capPlannedCount">—</div><div class="kpi-d">需要真实后端实现</div></div>
+          <div class="card kpi"><div class="kpi-l">运行模式</div><div class="kpi-v" id="capCoverage">—</div><div class="kpi-d" id="capReadinessState">仅用于本地演示</div></div>
+        </div>
+        <div class="card cap-readiness">
+          <div class="card-h"><div><div class="card-t">演示范围说明</div><div class="card-s">不展示原系统内部计划或验收结论</div></div></div>
+          <div class="card-b cap-readiness-grid" id="capReadinessBreakdown"></div>
+        </div>
+        <div class="cap-board">
+          <div class="card"><div class="card-h"><div><div class="card-t">本地可体验</div><div class="card-s">本地示例功能</div></div><span class="badge ok" id="capReadyBadge">0 项</span></div><div class="cap-list" id="capReadyList"></div></div>
+          <div class="card"><div class="card-h"><div><div class="card-t">界面预览</div><div class="card-s">依赖环境配置或生产验证</div></div><span class="badge" id="capConditionalBadge">0 项</span></div><div class="cap-list" id="capConditionalList"></div></div>
+          <div class="card"><div class="card-h"><div><div class="card-t">未接入服务</div><div class="card-s">本版不含下列后端实现</div></div><span class="badge wait" id="capPlannedBadge">0 项</span></div><div class="cap-list" id="capPlannedList"></div></div>
+        </div>
+      </section>
+
+      <!-- CONVERSATIONAL AGENT BUILDER -->
+      <section class="view" id="view-builder">
+        <div class="page-h">
+          <div><div class="page-t">Agent 搭建助手</div><div class="page-s">用自然语言生成可审查的 Agent 草稿；模型负责规划，中台负责能力解析、编译和校验</div></div>
+          <div><span class="badge" id="builderModeBadge">草稿模式</span><button class="btn" onclick="builderNewSession()">新建对话</button></div>
+        </div>
+        <div id="builderNotice"></div>
+        <div class="builder-toolbar">
+          <div class="fld"><label>搭建会话（session_id）</label><select class="inp" id="builderSessionSelect" onchange="builderSelectSession(this.value)"><option value="">新建后开始</option></select></div>
+          <div class="fld"><label>所属项目（project_code）</label><select class="inp" id="builderProject"><option value="">暂不归类</option></select></div>
+          <div class="fld"><label>规划模型（model_ref）</label><select class="inp" id="builderModel"><option value="">规则规划（无模型）</option></select></div>
+          <button class="btn" onclick="loadBuilderPage(true)">刷新能力</button>
+        </div>
+        <div class="builder-workspace">
+          <div class="builder-panel">
+            <div class="builder-panel-head"><div><div class="builder-panel-title">历史会话</div><div class="builder-panel-sub">仅显示当前账号创建的会话</div></div></div>
+            <div class="builder-session-list" id="builderSessionList"><div class="empty">暂无搭建会话</div></div>
+            <div class="builder-capability-summary" id="builderCapabilitySummary">正在读取能力目录…</div>
+          </div>
+          <div class="builder-panel">
+            <div class="builder-panel-head"><div><div class="builder-panel-title">需求对话</div><div class="builder-panel-sub" id="builderChatSub">先描述希望 Agent 完成什么</div></div></div>
+            <div class="builder-chat" id="builderChat"><div class="builder-empty"><b>描述一个可执行的目标</b>例如：输入用户名，让大模型生成中文欢迎语；失败时返回固定欢迎语。</div></div>
+            <div class="builder-composer">
+              <textarea class="inp" id="builderInput" placeholder="描述输入、输出、处理步骤、失败策略；也可以继续说“增加人工审核”或“把兜底改成补偿”" onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter')builderSend()"></textarea>
+              <div class="builder-composer-actions"><span class="builder-composer-hint">Ctrl/⌘ + Enter 发送 · 生成结果只保存草稿</span><label class="chk"><input type="checkbox" id="builderUseModel" checked>使用模型规划</label><button class="btn primary" id="builderSendBtn" onclick="builderSend()">生成方案</button></div>
+            </div>
+          </div>
+          <div class="builder-panel">
+            <div class="builder-panel-head"><div><div class="builder-panel-title">提案与校验</div><div class="builder-panel-sub" id="builderProposalSub">尚未生成</div></div></div>
+            <div class="builder-proposal" id="builderProposal"><div class="builder-empty"><b>等待生成 AgentSpec</b>这里会展示编排节点、待确认项、真实依赖和 Graph 校验结果。</div></div>
+            <div class="builder-footer"><span class="builder-note" id="builderDraftNote">只有 READY 提案才能创建草稿</span><button class="btn" id="builderValidateBtn" onclick="builderValidate()" disabled>重新校验</button><button class="btn primary" id="builderCreateBtn" onclick="builderCreateDraft()" disabled>创建 Agent 草稿</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CANVAS -->
+      <section class="view" id="view-canvas">
+        <div class="page-h">
+          <div><div class="page-t">编排画布</div><div class="page-s">拖动节点调布局 · 从右侧圆点拖到目标节点即可连线 · 点连线改分支条件</div></div>
+          <div class="canvas-toolbar">
+            <span class="pill" id="modeBadge">检测后端…</span>
+            <div class="canvas-graph-nav" aria-label="编排图导航">
+              <select class="select" id="graphScopeSel" title="先选择 Agent 范围或未绑定编排图" onchange="pickGraphScope(this.value)"></select>
+              <select class="select" id="graphSel" title="选择当前范围内的编排图" onchange="pickGraph(this.value)"></select>
+              <input class="inp graph-search" id="graphSearch" type="search" autocomplete="off" placeholder="搜索 Graph 名称或 ID" aria-label="搜索编排图" oninput="setGraphSearch(this.value)">
+            </div>
+            <span class="card-s mono" id="graphMeta">—</span>
+            <button class="btn" onclick="loadGraph()">重新加载</button>
+            <button class="btn" id="runInputBtn" onclick="openRunInput()">运行参数</button>
+            <button class="btn primary" id="runBtn" onclick="runGraph()">运行</button>
+          </div>
+        </div>
+
+        <div class="canvas-toolbar" style="margin-bottom:10px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px">
+          <select class="select" id="palette"></select>
+          <button class="btn sm" id="addNodeBtn" onclick="addNode()">+ 添加节点</button>
+          <span style="width:1px;height:18px;background:var(--line)"></span>
+          <button class="btn sm" id="validateGraphBtn" onclick="validateGraph()">校验</button>
+          <button class="btn sm" id="saveGraphBtn" onclick="saveGraph(false)">保存草稿</button>
+          <button class="btn sm" id="publishGraphBtn" onclick="saveGraph(true)">发布版本</button>
+          <button class="btn sm" id="saveGraphAsBtn" onclick="saveGraphAs()">另存为新图</button>
+          <button class="btn sm danger" id="deleteGraphBtn" onclick="deleteGraph(this)">删除编排图</button>
+          <span style="flex:1"></span>
+          <span class="card-s">连好后点「校验 → 保存 → 运行」，本地按这张图模拟执行</span>
+        </div>
+        <div id="vbar"></div>
+
+        <div class="canvas-shell">
+          <div class="canvas-workspace" id="canvasWorkspace">
+          <div class="canvas-col">
+            <div class="canvas-stage">
+              <div class="canvas-wrap" id="canvasWrap">
+                <div class="canvas-layer" id="canvasLayer">
+                  <div id="canvas">
+                    <svg id="edges"></svg>
+                  </div>
+                </div>
+                <div class="canvas-selection-box" id="canvasSelectionBox" aria-hidden="true"></div>
+              </div>
+              <div class="zoom-hint">Ctrl/⌘ + 滚轮缩放 · 空白拖拽平移 · Shift + 拖拽框选</div>
+              <div class="zoom-ctl">
+                <button id="zOut" title="缩小（-）" onclick="zoomStep(-1)">−</button>
+                <div class="zlabel" id="zLabel" title="点击恢复 100%" onclick="zoomReset()">100%</div>
+                <button id="zIn" title="放大（+）" onclick="zoomStep(1)">+</button>
+                <span class="zsep"></span>
+                <button class="zw" id="zFit" title="适应画布（0）" onclick="fitZoom()">适应</button>
+                <button class="zw" id="zOne" title="实际大小（1）" onclick="zoomReset()">1:1</button>
+                <span class="zsep"></span>
+                <button class="canvas-focus-btn" id="canvasFocusBtn" title="进入画布专注模式" aria-label="进入画布专注模式" aria-pressed="false" onclick="toggleCanvasFocus()"><span id="canvasFocusIcon" aria-hidden="true">⛶</span></button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-b split" style="padding:9px 14px">
+                <div style="font-size:11.5px;color:var(--muted)">
+                  graph_key · <span class="mono" id="graphKey">—</span>
+                </div>
+                <div style="display:flex;gap:14px;font-size:11px;color:var(--muted)">
+                  <span>节点 <b style="color:var(--text)" id="gNodeCount">3</b></span>
+                  <span>边 <b style="color:var(--text)" id="gEdgeCount">2</b></span>
+                  <span>最大重试 <b style="color:var(--text)">2</b></span>
+                  <span>checkpointer <b style="color:var(--text)">Tiered</b></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="runtime-inspector" id="runtimeInspector" data-testid="runtime-inspector">
+            <div class="runtime-resize" id="runtimeResize" data-testid="runtime-resize" title="拖动调整运行检查器宽度"></div>
+            <div class="runtime-inspector-head">
+              <div class="runtime-head-title"><div class="panel-t">运行检查器</div><div class="card-s">实时运行与节点诊断</div></div>
+              <span class="badge run" id="runState">idle</span>
+              <div class="inspector-spacer"></div>
+              <button class="btn sm runtime-toggle" id="runtimeToggle" title="收起运行检查器" aria-label="收起运行检查器" aria-expanded="true" onclick="toggleRuntimeInspector()">›</button>
+            </div>
+            <div class="runtime-tabs" role="tablist" aria-label="运行检查器视图">
+              <button class="runtime-tab on" data-runtime-tab="run" onclick="setRuntimeTab('run')">本次运行</button>
+              <button class="runtime-tab" data-runtime-tab="log" onclick="setRuntimeTab('log')">运行日志 <span class="mono" id="logCount">0</span></button>
+              <button class="runtime-tab" data-runtime-tab="node" onclick="setRuntimeTab('node')">节点输出</button>
+            </div>
+            <div class="runtime-pane on" data-runtime-pane="run">
+              <div class="panel-sec">
+                <div class="panel-h"><div class="panel-t">运行概览</div><span class="card-s">实时状态</span></div>
+                <div class="panel-b" style="padding:8px 12px 10px">
+                  <div class="mini-kpi"><span>节点进度</span><b id="kProg">0 / 8</b></div>
+                  <div class="mini-kpi"><span>Token 累计</span><b id="kTok">0</b></div>
+                  <div class="mini-kpi"><span>耗时</span><b id="kMs">0 ms</b></div>
+                  <div class="mini-kpi"><span>预估成本</span><b id="kCost">¥0.000</b></div>
+                  <button class="btn sm" id="cancelWaitBtn" style="display:none;width:100%;margin-top:8px" onclick="cancelLiveWait()">取消等待</button>
+                </div>
+              </div>
+
+              <div class="panel-sec" id="approveSec" style="display:none;border-color:#f0d9a8;background:#fffdf6">
+                <div class="panel-h" style="background:#fff8e8;border-color:#f3e3c0">
+                  <div class="panel-t" style="color:#92400e">待人工审批</div><span class="badge wait">waiting</span>
+                </div>
+                <div class="panel-b" style="padding:9px 12px 11px">
+                  <div id="apQ" style="font-size:11.5px;line-height:1.65;color:var(--text);margin-bottom:7px">—</div>
+                  <div class="mini-kpi"><span>置信度</span><b id="apConf">—</b></div>
+                  <div class="mini-kpi" style="align-items:flex-start"><span>质检意见</span><b id="apReasons" style="font-weight:400;font-size:10.5px;color:var(--muted);text-align:right;max-width:150px">—</b></div>
+                  <div id="apForm" style="display:flex;flex-direction:column;gap:6px;margin-top:8px"></div>
+                  <input id="apNote" placeholder="审批意见（可选）" style="width:100%;margin:8px 0 7px;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:11px;font-family:inherit;outline:none">
+                  <div style="display:flex;gap:6px">
+                    <button class="btn sm primary" style="flex:1" onclick="approveRun('approve')">通过并继续</button>
+                    <button class="btn sm" style="flex:0 0 auto" onclick="approveRun('reject')">驳回重做</button>
+                    <button class="btn sm" style="flex:0 0 auto" onclick="cancelLiveWait()">取消</button>
+                  </div>
+                  <div style="font-size:10px;color:var(--faint);margin-top:7px;line-height:1.5">
+                    图已停在 <span class="mono">interrupt()</span>，状态存在 checkpointer；关掉服务重启也能接着审。
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="runtime-pane runtime-log-pane" data-runtime-pane="log">
+              <div class="runtime-log-head"><div class="panel-t">运行日志</div><span class="card-s">按时间持续更新</span></div>
+              <div class="log" id="log"></div>
+            </div>
+            <div class="runtime-pane runtime-node-pane" data-runtime-pane="node" id="runtimeNodeBody">
+              <div class="empty">选择节点后查看本次运行的输入、输出和模型调用诊断</div>
+            </div>
+          </aside>
+          </div>
+
+          <div class="side-panel" id="canvasInspector" data-testid="canvas-inspector">
+            <div class="inspector-head">
+              <div class="panel-t">节点摘要</div>
+              <div class="inspector-spacer"></div>
+              <span class="card-s" id="inspectorSelection">未选择节点</span>
+              <button class="btn sm inspector-toggle" id="inspectorToggle" data-testid="inspector-toggle" title="收起节点摘要" aria-label="收起节点摘要" aria-expanded="true" onclick="toggleInspector()">⌄</button>
+            </div>
+            <div class="inspector-content">
+              <div class="inspector-detail inspector-summary" id="detailSec">
+                <div id="inspectorSummaryBody"><div class="empty">点击节点查看摘要，双击进入配置</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRACE -->
+      <section class="view" id="view-trace">
+        <div class="page-h">
+          <div><div class="page-t">运行追踪</div><div class="page-s">画布、API 与触发器创建的 Run 统一在这里查看 · 运行中每 5 秒自动刷新</div></div>
+          <div class="trace-actions">
+            <div class="trace-run-search">
+              <input class="inp" id="traceRunId" autocomplete="off" placeholder="输入 run_id，例如 r_B32F974C" onkeydown="if(event.key==='Enter') locateTraceRun()">
+              <button class="btn" id="traceLocateBtn" onclick="locateTraceRun()">定位</button>
+            </div>
+            <button class="btn" id="traceRefreshBtn" onclick="refreshTraceRuns(this)">刷新</button>
+            <button class="btn" onclick="copySelectedTraceId()">复制 traceId</button>
+            <button class="btn" onclick="go('canvas')">回到画布</button>
+          </div>
+        </div>
+        <div class="trace-grid">
+          <div class="card" style="align-self:start">
+            <div class="card-h"><div class="card-t">Run 列表</div><div class="card-s">最近 30 条</div></div>
+            <div class="trace-list-meta" id="traceListMeta">进入页面后自动刷新</div>
+            <div id="runList"></div>
+          </div>
+          <div class="card">
+            <div class="card-h">
+              <div><div class="card-t" id="traceTitle">选择一次运行</div><div class="card-s mono" id="traceSub">—</div></div>
+              <span class="badge ok" id="traceBadge">succeeded</span>
+            </div>
+            <div class="card-b" style="padding:12px 14px 4px">
+              <div class="grid g4" style="gap:8px">
+                <div><div class="kpi-l">总耗时</div><div style="font-size:16px;font-weight:600" id="tTotal">—</div></div>
+                <div><div class="kpi-l">Token</div><div style="font-size:16px;font-weight:600" id="tTok">—</div></div>
+                <div><div class="kpi-l">工具调用</div><div style="font-size:16px;font-weight:600" id="tTool">—</div></div>
+                <div><div class="kpi-l">重试</div><div style="font-size:16px;font-weight:600" id="tRetry">—</div></div>
+              </div>
+            </div>
+            <div class="spans" id="spans">
+              <div class="timeline-scale"><div>节点</div><div>时间轴</div><div style="text-align:right">耗时 / Token</div></div>
+              <div class="empty">运行一次后这里会出现节点级 span</div>
+            </div>
+            <div class="card-h" style="border-top:1px solid var(--line-2)">
+              <div><div class="card-t">节点输入输出</div><div class="card-s">点击上方时间线节点查看持久化快照</div></div>
+              <span class="card-s mono" id="traceNodeName">未选择</span>
+            </div>
+            <div class="card-b" id="traceNodeIO" data-testid="trace-node-io">
+              <div class="empty">选择一个节点查看输入与输出</div>
+            </div>
+            <div class="card-h" style="border-top:1px solid var(--line-2);border-bottom:none">
+              <div class="card-t">事件流（SSE）</div><div class="card-s">Last-Event-ID 可续传</div>
+            </div>
+            <div class="code" id="sse" style="max-height:150px;border-top:1px solid var(--line-2)">// 等待运行…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTEXT -->
+      <section class="view" id="view-context">
+        <div class="page-h">
+          <div><div class="page-t">召回与上下文装配</div><div class="page-s">Redis 会话槽位 · Milvus 三路召回（稠密 + BM25 + bge-m3）· 统一融合与预算裁剪</div></div>
+          <button class="btn" id="memoryWriteBtn" onclick="openMemoryWrite()">写入记忆</button>
+        </div>
+
+        <div class="ctx-bar">
+          <select class="inp" id="ctxKnowledge" onchange="contextKnowledgeChanged()"><option value="">选择知识库后召回</option></select>
+          <input type="text" id="q" value="" placeholder="请输入需要检索的问题" onkeydown="if(event.key==='Enter')recall()">
+          <button class="btn primary" id="contextRecallBtn" onclick="recall()">召回</button>
+          <div class="ctx-rerank-options">
+            <label class="chk"><input type="checkbox" id="ctxRerank" checked onchange="contextRerankChanged()">启用重排（rerank）</label>
+            <label>候选数量（candidate_top_n） <input class="inp" id="ctxCandidateTopN" type="number" min="1" max="100" value="20"></label>
+            <label>最终返回数（top_k） <input class="inp" id="ctxTopK" type="number" min="1" max="50" value="5"></label>
+            <label>重排最低分（rerank_min_score） <input class="inp" id="ctxRerankMinScore" type="number" min="0" max="1" step="0.05" value="0"></label>
+          </div>
+        </div>
+
+        <div class="grid g2" style="grid-template-columns:1.45fr 1fr">
+          <div class="card">
+            <div class="card-h"><div class="card-t">融合结果</div><div class="card-s" id="fuseMeta">RRF k=60 · top 5</div></div>
+            <div class="card-b" id="hits"><div class="empty">输入 query 后点击召回</div></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card">
+              <div class="card-h"><div class="card-t">召回源</div><div class="card-s">可单独关闭对比</div></div>
+              <div class="card-b">
+                <div style="display:flex;gap:14px;margin-bottom:10px">
+                  <label class="chk config-label"><input type="checkbox" id="srcMilvus" checked onchange="recall()">使用 Milvus 召回（use_milvus）</label>
+                  <label class="chk config-label"><input type="checkbox" id="srcRedis" checked onchange="recall()">使用 Redis 槽位（use_redis）</label>
+                </div>
+                <div class="hint">三路候选先执行最低相关度过滤，再按 RRF 融合排序。融合排名分仅用于排序，不代表语义相似度。</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-h"><div class="card-t">上下文装配</div><div class="card-s" id="budgetTxt">0 / 8000 tokens</div></div>
+              <div class="card-b">
+                <div class="budget-seg" id="budgetBar">
+                  <div style="width:0%;background:#c7cbff"></div><div style="width:0%;background:#bfe3cb"></div>
+                  <div style="width:0%;background:#f6dfbd"></div><div style="width:0%;background:#d5d9e0"></div>
+                </div>
+                <div class="legend" id="budgetLegend"></div>
+                <div style="margin-top:10px;border-top:1px dashed var(--line);padding-top:8px">
+                  <div class="slot-row"><span class="slot-k">system + 指令</span><span class="slot-v">800</span></div>
+                  <div class="slot-row"><span class="slot-k">任务 / 输入</span><span class="slot-v">1,600</span></div>
+                  <div class="slot-row"><span class="slot-k">检索上下文</span><span class="slot-v" id="bRet">0</span></div>
+                  <div class="slot-row"><span class="slot-k">会话历史（6 轮）</span><span class="slot-v">1,200</span></div>
+                  <div class="slot-row"><span class="slot-k">输出预留</span><span class="slot-v">1,600</span></div>
+                </div>
+                <div class="hint">超预算时按融合排名截断，并推送 <span class="mono">context_trimmed</span> 事件。</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-h"><div class="card-t">Redis 会话槽位</div><div class="card-s mono">ttl 2h</div></div>
+              <div class="card-b" id="slots"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <div class="card-h">
+            <div><div class="card-t">上下文运行调试</div><div class="card-s">按真实 Agent Run 查看加载、过滤、排序、压缩与模型治理决策</div></div>
+            <div style="flex:1"></div>
+            <select class="inp" id="contextRunSelect" style="width:min(460px,48vw)" onchange="loadContextRunDebug(this.value)"><option value="">选择最近运行</option></select>
+            <button class="btn sm" onclick="loadContextRuns()">刷新</button>
+          </div>
+          <div class="card-b" id="contextRunDebug"><div class="empty">选择一个包含 LLM 节点的运行查看上下文决策</div></div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <div class="card-h">
+            <div><div class="card-t">长期记忆</div><div class="card-s">当前知识库的记忆真源、血缘和索引状态</div></div>
+            <div style="flex:1"></div><span class="card-s" id="memoryCount">—</span>
+            <button class="btn sm" onclick="loadMemoryList()">刷新</button>
+          </div>
+          <div class="memory-list" id="memoryList"><div class="empty">选择知识库后查看记忆</div></div>
+        </div>
+      </section>
+
+      <!-- KNOWLEDGE BASE -->
+      <section class="view" id="view-knowledge">
+        <div class="page-h">
+          <div>
+            <div class="page-t">知识库治理</div>
+            <div class="page-s">租户隔离 · Agent 授权 · 敏感级别 · 保留期限 · 写入配额 · 变更审计</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="loadKnowledgePage(KNOWLEDGE_GOV.code)">刷新</button>
+            <button class="btn" id="knowledgeUploadShortcut" onclick="knowledgeOpenUpload()">上传文档</button>
+            <button class="btn primary" onclick="knowledgeNew()">新建知识库</button>
+          </div>
+        </div>
+        <div class="gov-grid">
+          <div class="card" style="align-self:start">
+            <div class="card-h"><div class="card-t">知识库目录</div><div class="card-s" id="knowledgeCount">—</div></div>
+            <div id="knowledgeList" style="max-height:600px;overflow:auto"></div>
+          </div>
+          <div id="knowledgeDetail" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+            <div class="card"><div class="empty">从左侧选择一个知识库，或新建知识库</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTRACT -->
+      <section class="view" id="view-contract">
+        <div class="page-h">
+          <div><div class="page-t">契约注册</div><div class="page-s">JSON Schema 是 Agent 之间的边界，版本发布后不可变</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="go('govern')">去治理页</button>
+            <button class="btn primary" onclick="openWizard('version')">发布新版本</button>
+          </div>
+        </div>
+        <div class="grid" style="grid-template-columns:250px 1fr">
+          <div class="card" style="align-self:start">
+            <div class="card-h"><div class="card-t">Agent</div><div class="card-s" id="agentCount">—</div></div>
+            <div id="agentPickList"></div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-t" id="cTitle">未选择 Agent</div><div class="card-s mono" id="cId">—</div></div>
+            <div class="tabs" id="cTabs">
+              <div class="tab on" data-tab="input">input_schema</div>
+              <div class="tab" data-tab="output">output_schema</div>
+              <div class="tab" data-tab="errors">错误码</div>
+              <div class="tab" data-tab="events">SSE 事件</div>
+            </div>
+            <div class="code" id="cBody"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OBS -->
+      <section class="view" id="view-obs">
+        <div class="page-h">
+          <div><div class="page-t">可观测性</div><div class="page-s">仅统计当前浏览器中的模拟运行；未接入真实队列或 Worker</div></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="card-s mono" id="obsAt">—</span>
+            <button class="btn" onclick="loadObs()">刷新</button>
+          </div>
+        </div>
+        <div class="obs-filter-bar">
+          <div class="fld"><label>项目（project_code）</label><select class="select" id="obsProject" onchange="applyObsFilters('project')"></select></div>
+          <div class="fld"><label>Agent（agent_code）</label><select class="select" id="obsAgent" onchange="applyObsFilters('agent')"></select></div>
+          <div class="fld"><label>版本（version）</label><select class="select" id="obsVersion" onchange="applyObsFilters('version')"></select></div>
+          <div class="fld"><label>时间范围（range_seconds）</label><select class="select" id="obsRange" onchange="applyObsFilters('range')"><option value="3600">近 1 小时</option><option value="86400" selected>近 24 小时</option><option value="604800">近 7 天</option><option value="2592000">近 30 天</option></select></div>
+          <div class="obs-scope" id="obsScopeLabel">当前账号可见范围</div>
+        </div>
+        <div id="obsRuntimeAlert" style="margin-bottom:12px"></div>
+        <div class="grid g4" style="margin-bottom:12px">
+          <div class="card kpi"><div class="kpi-l">队列积压</div><div class="kpi-v" id="obsQueueDepth">—</div><div class="kpi-d" id="obsQueueDepthD">—</div></div>
+          <div class="card kpi"><div class="kpi-l">最老等待</div><div class="kpi-v" id="obsQueueOldest">—</div><div class="kpi-d" id="obsQueueOldestD">—</div></div>
+          <div class="card kpi"><div class="kpi-l">在线 Worker</div><div class="kpi-v" id="obsWorkerOnline">—</div><div class="kpi-d" id="obsWorkerOnlineD">—</div></div>
+          <div class="card kpi"><div class="kpi-l">执行容量</div><div class="kpi-v" id="obsWorkerLoad">—</div><div class="kpi-d" id="obsWorkerLoadD">—</div></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-h"><div><div class="card-t">队列与 Worker 实时状态</div><div class="card-s" id="obsRuntimeSub">每 10 秒自动刷新</div></div><div class="card-s mono" id="obsQueueName">—</div></div>
+          <div style="overflow:auto"><table><thead><tr><th>Worker</th><th>状态</th><th>负载</th><th>利用率</th><th>心跳</th><th>可接任务</th></tr></thead>
+            <tbody id="obsWorkers"><tr><td colspan="6"><div class="empty">加载中…</div></td></tr></tbody></table></div>
+          <div class="card-b" style="border-top:1px solid var(--line)"><div class="card-s" style="margin-bottom:5px">最老排队任务样本</div><div id="obsQueueSamples" class="mono" style="font-size:11px;color:var(--muted)">—</div></div>
+        </div>
+        <div class="grid g4" style="margin-bottom:12px">
+          <div class="card kpi"><div class="kpi-l">运行总数</div><div class="kpi-v" id="obsRuns">—</div><div class="kpi-d" id="obsRunsD">—</div></div>
+          <div class="card kpi"><div class="kpi-l">成功率</div><div class="kpi-v" id="obsSucc">—</div><div class="kpi-d" id="obsSuccD">—</div></div>
+          <div class="card kpi"><div class="kpi-l">p95 延迟</div><div class="kpi-v" id="obsP95">—</div><div class="kpi-d" id="obsP95D">—</div></div>
+          <div class="card kpi"><div class="kpi-l">成本（估）</div><div class="kpi-v" id="obsCost">—</div><div class="kpi-d" id="obsCostD">—</div></div>
+        </div>
+        <div class="grid g2" style="margin-bottom:12px">
+          <div class="card">
+            <div class="card-h"><div class="card-t">最近 Run 耗时</div><div class="card-s">当前筛选范围</div></div>
+            <div class="card-b" id="obsLat"><div class="empty">加载中…</div></div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-t">最近一次 Run · 节点耗时构成</div><div class="card-s" id="obsNodeSub">—</div></div>
+            <div class="card-b" id="obsNodes"><div class="empty">加载中…</div></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-h"><div><div class="card-t">节点历史性能</div><div class="card-s" id="obsNodeHistorySub">按 Agent、版本、Graph 和节点分别聚合</div></div><span class="card-s">持久化 node_end 事件</span></div>
+          <div class="obs-node-table"><table><thead><tr><th>Agent / 版本</th><th>Graph</th><th>节点</th><th>样本</th><th>平均</th><th>P50</th><th>P95</th><th>最大</th><th>失败率</th></tr></thead>
+            <tbody id="obsNodeHistory"><tr><td colspan="9"><div class="empty">加载中…</div></td></tr></tbody></table></div>
+        </div>
+        <div class="grid g2">
+          <div class="card">
+            <div class="card-h"><div class="card-t">最近失败</div><div class="card-s" id="obsFailSub">—</div></div>
+            <table><thead><tr><th>run</th><th>agent</th><th>错误码</th><th>时间</th></tr></thead>
+              <tbody id="obsFails"><tr><td colspan="4"><div class="empty">—</div></td></tr></tbody></table>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-t">尚未接入</div><div class="card-s">缺什么就说缺什么，不画假图</div></div>
+            <div class="card-b" style="font-size:11.5px;color:var(--muted);line-height:1.95">
+              · <b>延迟趋势</b>：已有 Run 与节点事件账本，但尚未做按分钟/天的时序聚合与长期保留<br>
+              · <b>护栏拦截</b>：guard 事件只在单次 run 的事件流里，没有聚合落库<br>
+              · <b>成本对账</b>：按 <span class="mono">usage.cost_usd</span> 实时累加，未与账单核验
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROMPT -->
+      <section class="view" id="view-prompt">
+        <div class="page-h">
+          <div>
+            <div class="page-t">Prompt 模板</div>
+            <div class="page-s">运行期真相在库里，不在 Python 里 · 保存生成新 rev · 已发布版本钉住旧 rev，改了要发新版本才生效</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="loadPromptPage()">刷新</button>
+            <button class="btn primary" onclick="promptNew()">新建模板</button>
+          </div>
+        </div>
+        <div class="gov-grid">
+          <div class="card" style="align-self:start">
+            <div class="card-h"><div class="card-t">模板</div><div class="card-s" id="pmCount">—</div></div>
+            <div id="pmList" style="max-height:600px;overflow:auto"></div>
+          </div>
+          <div id="pmDetail" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+            <div class="card"><div class="empty">从左侧选一个模板；或点「新建模板」给某个节点加一份专属说法</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- REVIEW TEMPLATE -->
+      <section class="view" id="view-review-template">
+        <div class="page-h">
+          <div>
+            <div class="page-t">人工审核模板</div>
+            <div class="page-s">面向业务人员组织审核内容 · JSON 路径绑定 · 不可变版本 · 发布后绑定 stable</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="loadReviewTemplatePage(REVIEW_TEMPLATE_GOV.code)">刷新</button>
+            <button class="btn primary" id="reviewTemplateNewBtn" onclick="reviewTemplateNew()">新建模板</button>
+          </div>
+        </div>
+        <div id="reviewTemplateNotice"></div>
+        <div class="gov-grid review-template-layout">
+          <div class="card review-template-directory">
+            <div class="card-h"><div class="card-t review-template-directory-head">模板目录</div><div class="review-template-count" id="reviewTemplateCount">—</div></div>
+            <div class="review-template-list" id="reviewTemplateList"></div>
+          </div>
+          <div id="reviewTemplateDetail" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+            <div class="card"><div class="empty">选择模板查看版本，或创建一份业务审核模板</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODEL -->
+      <section class="view" id="view-model">
+        <div class="page-h">
+          <div>
+            <div class="page-t">LLM 模型治理</div>
+            <div class="page-s">多模型注册 · 凭证隔离 · 连通性测试 · 不可变版本 · Agent 发布时固定模型版本</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="loadModelPage(MODEL_GOV.code)">刷新</button>
+            <button class="btn primary" onclick="modelNew()">新建模型</button>
+          </div>
+        </div>
+        <div class="gov-grid">
+          <div class="card" style="align-self:start">
+            <div class="card-h"><div class="card-t">Model Registry</div><div class="card-s" id="modelCount">—</div></div>
+            <div id="modelList" style="max-height:600px;overflow:auto"></div>
+          </div>
+          <div id="modelDetail" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+            <div class="card"><div class="empty">从左侧选择一个模型，或新建模型</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CREDENTIAL -->
+      <section class="view" id="view-credential">
+        <div class="page-h">
+          <div>
+            <div class="page-t">凭证管理</div>
+            <div class="page-s">加密存储 · 环境隔离 · 轮换与启停 · 引用保护 · 全程审计</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="loadCredentialPage(CREDENTIAL_GOV.code)">刷新</button>
+            <button class="btn primary" onclick="credentialNew()">新建凭证</button>
+          </div>
+        </div>
+        <div class="gov-grid">
+          <div class="card" style="align-self:start">
+            <div class="card-h"><div class="card-t">凭证保险箱</div><div class="card-s" id="credentialCount">—</div></div>
+            <div id="credentialList" style="max-height:600px;overflow:auto"></div>
+          </div>
+          <div id="credentialDetail" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+            <div class="card"><div class="empty">从左侧选择一个凭证，或新建凭证</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SKILL -->
+      <section class="view" id="view-skill">
+        <div class="page-h">
+          <div>
+            <div class="page-t">Skill 治理</div>
+            <div class="page-s">能力注册 · 不可变版本 · 输入/输出契约 · 测试准入 · 发布与引用审计</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="loadSkillPage(SKILL_GOV.code)">刷新</button>
+            <button class="btn" onclick="skillInstall()">安装外部 Skill</button>
+            <button class="btn primary" onclick="skillNew()">新建 Skill</button>
+          </div>
+        </div>
+        <div class="gov-grid">
+          <div class="card" style="align-self:start">
+            <div class="card-h"><div class="card-t">Skill Registry</div><div class="card-s" id="skillCount">—</div></div>
+            <div id="skillList" style="max-height:600px;overflow:auto"></div>
+          </div>
+          <div id="skillDetail" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+            <div class="card"><div class="empty">从左侧选择一个 Skill</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- EVALUATION -->
+      <section class="view" id="view-evaluation">
+        <div class="page-h">
+          <div>
+            <div class="page-t">自动化评测与发布门禁</div>
+            <div class="page-s">数据集回归 · 确定性断言 · 延迟与 Token 阈值 · 基线对比 · 发布拦截</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="loadEvaluationPage(EVAL_GOV.code)">刷新</button>
+            <button class="btn primary" id="newEvaluationDatasetBtn" onclick="evaluationNewDataset()">新建数据集</button>
+          </div>
+        </div>
+        <div class="gov-grid">
+          <div class="card" style="align-self:start">
+            <div class="card-h"><div class="card-t">评测数据集</div><div class="card-s" id="evaluationDatasetCount">—</div></div>
+            <div class="node-filters">
+              <input class="inp" id="evaluationSearch" placeholder="搜索名称或 code" oninput="renderEvaluationDatasetList()">
+              <select class="inp" id="evaluationAgentFilter" onchange="renderEvaluationDatasetList()"><option value="">全部 Agent</option></select>
+            </div>
+            <div id="evaluationDatasetList" style="max-height:650px;overflow:auto"></div>
+          </div>
+          <div id="evaluationDetail" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+            <div class="card"><div class="empty">选择或新建一个评测数据集</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRIGGER -->
+      <section class="view" id="view-trigger">
+        <div class="page-h">
+          <div>
+            <div class="page-t">触发器治理中心</div>
+            <div class="page-s">定时任务 · Webhook · 事件订阅 · 启停 · 执行记录 · 失败重放</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="loadTriggerPage(TRIGGER_GOV.code)">刷新</button>
+            <button class="btn primary" id="newTriggerBtn" onclick="triggerNew()">新建触发器</button>
+          </div>
+        </div>
+        <div class="gov-grid">
+          <div class="card" style="align-self:start">
+            <div class="card-h"><div class="card-t">触发器目录</div><div class="card-s" id="triggerCount">—</div></div>
+            <div class="node-filters">
+              <input class="inp" id="triggerSearch" placeholder="搜索名称或 code" oninput="renderTriggerList()">
+              <select class="inp" id="triggerTypeFilter" onchange="renderTriggerList()"><option value="">全部类型</option><option value="cron">定时任务</option><option value="webhook">Webhook</option><option value="event">事件订阅</option></select>
+              <select class="inp" id="triggerStatusFilter" onchange="renderTriggerList()"><option value="">全部状态</option><option value="active">已启用</option><option value="disabled">已停用</option></select>
+              <select class="inp" id="triggerAgentFilter" onchange="renderTriggerList()"><option value="">全部 Agent</option></select>
+            </div>
+            <div id="triggerList" style="max-height:600px;overflow:auto"></div>
+          </div>
+          <div id="triggerDetail" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+            <div class="card"><div class="empty">从左侧选择一个触发器，或新建触发器</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NODE -->
+      <section class="view" id="view-node">
+        <div class="page-h">
+          <div>
+            <div class="page-t">节点管理</div>
+            <div class="page-s">节点目录 · 配置契约 · 编排引用 · 运行状态 · 变更审计</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="go('skill');skillNew()">新建共享能力</button>
+            <button class="btn primary" onclick="nodeAddPrivate()">添加 Agent 专属节点</button>
+            <button class="btn" onclick="loadNodePage(NODE_GOV.selected)">刷新</button>
+          </div>
+        </div>
+        <div class="gov-grid">
+          <div class="card" style="align-self:start">
+            <div class="card-h"><div class="card-t">节点目录</div><div class="card-s" id="nodeCount">—</div></div>
+            <div class="node-filters">
+              <input class="inp" id="nodeSearch" placeholder="搜索名称或 type" oninput="nodeApplyFilters()">
+              <select class="inp" id="nodeCategory" onchange="nodeApplyFilters()"><option value="">全部分类</option></select>
+              <select class="inp" id="nodeScope" onchange="nodeApplyFilters()"><option value="">全部范围</option><option value="platform">平台共享</option><option value="agent">Agent 专属</option></select>
+              <select class="inp" id="nodeStatus" onchange="nodeApplyFilters()"><option value="">全部状态</option><option value="enabled">已启用</option><option value="disabled">已停用</option></select>
+            </div>
+            <div id="nodeList" style="max-height:600px;overflow:auto"></div>
+          </div>
+          <div id="nodeDetail" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+            <div class="card"><div class="empty">从左侧选择一个节点类型</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROJECT -->
+      <section class="view" id="view-project">
+        <div class="page-h">
+          <div><div class="page-t">项目治理</div><div class="page-s">组织业务空间 · 管理 Agent 主项目归属 · 保持历史运行项目快照稳定</div></div>
+          <div style="display:flex;gap:8px"><button class="btn" onclick="loadProjectPage(PROJECT_GOV.code)">刷新</button><button class="btn primary" id="newProjectBtn" onclick="projectNew()">新建项目</button></div>
+        </div>
+        <div id="projectNotice"></div>
+        <div class="gov-grid">
+          <div class="card" style="align-self:start"><div class="card-h"><div class="card-t">项目目录</div><div class="card-s" id="projectCount">—</div></div><div id="projectList" style="max-height:600px;overflow:auto"></div></div>
+          <div id="projectDetail" style="display:flex;flex-direction:column;gap:12px;min-width:0"></div>
+        </div>
+      </section>
+
+      <!-- GOVERN -->
+      <section class="view" id="view-govern">
+        <div class="page-h">
+          <div>
+            <div class="page-t">Agent 治理</div>
+            <div class="page-s">注册 · 不可变版本 · 评测准入 · 灰度与发布 · 依赖与审计（只读取本地虚构数据）</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="loadGov(GOV.code)">刷新</button>
+            <button class="btn primary" id="newAgentBtn" onclick="openWizard('agent')">新建 Agent</button>
+          </div>
+        </div>
+        <div class="gov-grid">
+          <div class="card" style="align-self:start">
+            <div class="card-h"><div><div class="card-t">注册表</div><div class="card-s" id="govCount">—</div></div><select class="inp" id="govProjectFilter" style="width:130px;height:30px" onchange="renderGovList()"><option value="">全部项目</option></select></div>
+            <div id="govList" style="max-height:560px;overflow:auto"></div>
+          </div>
+          <div id="govDetail" style="display:flex;flex-direction:column;gap:12px;min-width:0"></div>
+        </div>
+      </section>
+
+      <!-- ACCOUNT -->
+      <section class="view" id="view-account">
+        <div class="page-h">
+          <div>
+            <div class="page-t">账号与权限</div>
+            <div class="page-s">飞书认证 · 中台 RBAC 授权 · 服务端会话 · 实时撤权 · 安全审计</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="loadAccountPage()">刷新</button>
+            <button class="btn" id="accountSyncBtn" onclick="accountSyncDirectory()">同步飞书通讯录</button>
+            <button class="btn" id="logoutBtn" onclick="authLogout()">退出登录</button>
+          </div>
+        </div>
+        <div id="accountNotice"></div>
+        <div class="account-grid" id="accountWorkspace">
+          <div class="card">
+            <div class="card-h"><div class="card-t">平台账号</div><div class="card-s" id="accountCount">—</div></div>
+            <div id="accountList" style="max-height:600px;overflow:auto"></div>
+          </div>
+          <div id="accountDetail"><div class="card"><div class="empty">从左侧选择一个账号</div></div></div>
+        </div>
+        <div class="card" id="accountAuditCard" style="margin-top:12px">
+          <div class="card-h"><div class="card-t">安全审计</div><div class="card-s">最近 100 条</div></div>
+          <div style="overflow:auto"><table><thead><tr><th>时间</th><th>操作人</th><th>动作</th><th>对象</th><th>结果</th></tr></thead><tbody id="accountAudit"></tbody></table></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="auth-gate" id="authGate">
+  <div class="auth-panel">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div><div class="brand-txt">Agent 中台</div><div class="brand-sub">Identity & Access</div></div>
+    </div>
+    <div class="auth-title">登录到 Agent 中台</div>
+    <div class="auth-copy" id="authGateCopy">使用企业飞书账号完成身份验证，权限由 Agent 中台角色控制。</div>
+    <div class="auth-actions">
+      <button class="btn primary" id="feishuLoginBtn" onclick="authFeishuLogin()">使用飞书登录</button>
+      <button class="btn" id="localLoginBtn" onclick="authLocalLogin()" style="display:none">本地开发登录</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="projectTokenMask" role="dialog" aria-modal="true" aria-labelledby="projectTokenTitle">
+  <div class="modal" style="width:min(760px,100%)">
+    <div class="modal-h">
+      <div><div class="modal-t" id="projectTokenTitle">创建项目 API Token</div><div class="card-s" id="projectTokenSub">用于服务端通过 App ID + Token 调用项目内 Agent</div></div>
+      <div style="flex:1"></div><button class="btn ghost sm" onclick="projectTokenClose()">关闭</button>
+    </div>
+    <div class="modal-b">
+      <div id="projectTokenForm" class="frm">
+        <div class="fld wide"><label>名称（name） <b>*</b></label><input class="inp" id="projectTokenName" placeholder="广告系统测试环境"></div>
+        <div class="fld wide"><label>权限范围（scopes）</label><div style="display:flex;gap:16px;flex-wrap:wrap;padding:8px 0"><label><input type="checkbox" class="project-token-scope" value="agent.invoke" checked> 调用 Agent（agent.invoke）</label><label><input type="checkbox" class="project-token-scope" value="run.read" checked> 查询运行（run.read）</label><label><input type="checkbox" class="project-token-scope" value="run.event"> 投递等待事件（run.event）</label></div></div>
+        <div class="fld wide"><label>Agent 白名单（agent_codes）</label><select class="inp" id="projectTokenAgents" multiple style="min-height:96px"></select><div class="hint">不选择表示允许调用项目内全部 Agent。</div></div>
+        <div class="fld"><label>来源 IP（allowed_ips）</label><textarea class="inp" id="projectTokenIps" rows="3" placeholder="192.0.2.0/24&#10;198.51.100.10"></textarea><div class="hint">每行一个 IP/CIDR；留空不限制。</div></div>
+        <div class="fld"><label>回调域名（callback_hosts）</label><textarea class="inp" id="projectTokenCallbacks" rows="3" placeholder="callback.example.internal"></textarea><div class="hint">每行一个主机名；留空时禁止 callback_url。</div></div>
+        <div class="fld"><label>每分钟上限（rate_limit_per_min）</label><input class="inp" id="projectTokenRate" type="number" min="1" max="10000" value="60"></div>
+        <div class="fld"><label>过期时间（expires_at）</label><input class="inp" id="projectTokenExpiry" type="datetime-local"><div class="hint">留空表示长期有效。</div></div>
+      </div>
+      <div id="projectTokenSecret" style="display:none"></div>
+    </div>
+    <div class="modal-f"><div class="hint" id="projectTokenFoot">Token 明文只在创建或轮换后展示一次。</div><div style="flex:1"></div><button class="btn" onclick="projectTokenClose()">取消</button><button class="btn primary" id="projectTokenSubmit" onclick="projectTokenCreate(this)">创建 Token</button></div>
+  </div>
+</div>
+
+<div class="mask" id="nodeConfigMask" role="dialog" aria-modal="true" aria-labelledby="nodeConfigTitle" data-testid="node-config-mask" onclick="nodeEditorBackdrop(event)">
+  <div class="modal node-config-modal" data-testid="node-config-modal">
+    <div class="modal-h">
+      <div><div class="modal-t" id="nodeConfigTitle">节点配置</div><div class="card-s mono" id="nodeConfigMeta">—</div></div>
+      <span class="node-editor-dirty" id="nodeConfigDirty">未保存</span>
+      <div style="flex:1"></div>
+      <button class="btn ghost sm" id="nodeConfigClose" onclick="closeNodeEditor()">关闭</button>
+    </div>
+    <div class="node-config-tabs" role="tablist" aria-label="节点配置视图">
+      <button class="node-config-tab" data-tab="basic" onclick="setNodeEditorTab('basic')">基础配置</button>
+      <button class="node-config-tab" data-tab="config" onclick="setNodeEditorTab('config')">输入输出与业务配置</button>
+      <button class="node-config-tab" data-tab="test" onclick="setNodeEditorTab('test')">试运行</button>
+      <button class="node-config-tab" data-tab="help" onclick="setNodeEditorTab('help')">使用说明</button>
+    </div>
+    <div class="modal-b" id="detailBody"><div class="empty">请选择节点</div></div>
+    <div class="modal-f">
+      <div class="hint" id="nodeConfigHint" style="margin:0">保存后写入当前画布草稿，仍需点击画布顶部“保存草稿”持久化。</div>
+      <div style="flex:1"></div>
+      <button class="btn" onclick="closeNodeEditor()">取消</button>
+      <button class="btn" id="nodeConfigSave" onclick="saveNodeEditor(false)">保存配置</button>
+      <button class="btn primary" id="nodeConfigSaveRun" onclick="saveNodeEditor(true)">保存并试运行</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="wizMask">
+  <div class="modal">
+    <div class="modal-h">
+      <div class="modal-t" id="wizTitle">新建 Agent</div>
+      <div class="wiz-steps" id="wizSteps"></div>
+      <div style="flex:1"></div>
+      <button class="btn ghost sm" onclick="closeWizard()">关闭</button>
+    </div>
+    <div class="modal-b">
+      <div id="wizStep1">
+        <div class="frm">
+          <div class="fld">
+            <label>编码（code） <b>*</b></label>
+            <input class="inp mono" id="wCode" maxlength="96" placeholder="voc.weekly.agent" autocomplete="off">
+            <div class="hint">3–96 个字符，以小写字母开头，可使用小写字母、数字、点、下划线和连字符；注册后不可改</div>
+          </div>
+          <div class="fld">
+            <label>名称（name） <b>*</b></label>
+            <input class="inp" id="wName" placeholder="反馈分析 周报" autocomplete="off">
+          </div>
+          <div class="fld">
+            <label>所属项目（project_code）</label>
+            <select class="inp" id="wProject"><option value="">未归类</option></select>
+            <div class="hint">项目用于治理、审核目录和统计，不替代 Agent 权限</div>
+          </div>
+          <div class="fld wide">
+            <label>说明（description）</label>
+            <input class="inp" id="wDesc" placeholder="一句话说清这个 agent 干什么、给谁用" autocomplete="off">
+          </div>
+          <div class="fld">
+            <label>责任部门（owner_dept）</label>
+            <input class="inp" id="wDept" placeholder="数据中台" autocomplete="off">
+          </div>
+          <div class="fld">
+            <label>负责人（owner_user）</label>
+            <input class="inp" id="wOwner" placeholder="xk" autocomplete="off">
+          </div>
+          <div class="fld">
+            <label>可见性（visibility）</label>
+            <select class="inp" id="wVis">
+              <option value="internal">internal · 仅中台内部</option>
+              <option value="public">public · 可被其他 agent 调用</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label>标签（tags，逗号分隔）</label>
+            <input class="inp" id="wTags" placeholder="voc,weekly" autocomplete="off">
+          </div>
+        </div>
+      </div>
+
+      <div id="wizStep2" style="display:none">
+        <div class="frm">
+          <div class="fld">
+            <label>绑定编排图（graph_id） <b>*</b></label>
+            <select class="inp" id="wGraph" onchange="wizPreview()"></select>
+            <div class="hint" id="wGraphHint">绑定后，生产调用（stable 别名）就跑这张图</div>
+            <div id="wGraphActions" style="display:none;gap:6px;margin-top:7px">
+              <button class="btn sm" type="button" onclick="wizCreateStarterGraph()">快速创建最小编排图</button>
+              <button class="btn sm" type="button" onclick="refreshWizardGraphs()">刷新列表</button>
+            </div>
+          </div>
+          <div class="fld">
+            <label>错误码（error_codes，逗号分隔）</label>
+            <input class="inp mono" id="wErrs" autocomplete="off" placeholder="CONTRACT_INPUT_INVALID,TOOL_TIMEOUT">
+            <div class="hint">必须至少声明一个，否则评测的 errors 项不通过</div>
+          </div>
+          <div class="fld">
+            <label>输入契约（input_schema）</label>
+            <textarea class="inp schema-editor" data-json-editor="true" id="wIn" spellcheck="false" oninput="wizPreview()"></textarea>
+          </div>
+          <div class="fld">
+            <label>输出契约（output_schema）</label>
+            <textarea class="inp schema-editor" data-json-editor="true" id="wOut" spellcheck="false" oninput="wizPreview()"></textarea>
+          </div>
+          <div class="fld wide">
+            <label>上下文策略（context_policy）</label>
+            <textarea class="inp schema-editor" data-json-editor="true" id="wContextPolicy" spellcheck="false" oninput="wizPreview()"></textarea>
+            <div class="hint">默认关闭并兼容旧版；启用后按来源、路径和 Token 预算装配 LLM 上下文，可按节点 ID 覆盖</div>
+          </div>
+          <div class="fld">
+            <label>QPS 配额（quota.qps）</label>
+            <input class="inp" id="wQps" type="number" min="1" value="10">
+          </div>
+          <div class="fld">
+            <label>每日 Token 配额（quota.daily_tokens）</label>
+            <input class="inp" id="wTokens" type="number" min="1000" step="1000" value="2000000">
+          </div>
+          <div class="fld wide">
+            <label class="chk"><input type="checkbox" id="wPublish" checked onchange="wizPreview()"> 创建后评测并发布（publish_after_create）</label>
+          </div>
+          <div class="fld wide">
+            <div class="sub-t">请求预览</div>
+            <div class="req" id="wizReq">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="wiz-err" id="wizErr" role="alert" aria-live="polite"></div>
+    </div>
+    <div class="modal-f">
+      <button class="btn" id="wizBack" onclick="wizPrev()" style="display:none">上一步</button>
+      <button class="btn primary" id="wizNext" onclick="wizNext()">下一步</button>
+      <div style="flex:1"></div>
+      <div class="hint" id="wizHint" style="margin:0"></div>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="runInputMask">
+  <div class="modal run-input-modal">
+    <div class="modal-h">
+      <div><div class="modal-t">运行参数</div><div class="card-s mono" id="runInputMeta">—</div></div>
+      <div style="flex:1"></div>
+      <button class="btn ghost sm" onclick="closeRunInput()">关闭</button>
+    </div>
+    <div class="modal-b">
+      <div class="run-input-meta">这里填写一次 Agent 调用的 input。start 节点启用 copy_input 后，会把它复制到 variables。保存的测试用例仅留在当前浏览器，请勿填写密钥或生产敏感数据。</div>
+      <div class="run-input-controls">
+        <select class="inp" id="runCaseSel" onchange="selectRunCase(this.value)"></select>
+        <input class="inp" id="runCaseName" placeholder="测试用例名称">
+        <button class="btn sm" onclick="newRunCase()">新建</button>
+        <button class="btn sm" onclick="saveRunCase()">保存</button>
+        <button class="btn sm danger" id="deleteRunCaseBtn" onclick="deleteRunCase()">删除</button>
+      </div>
+      <textarea class="inp run-input-editor" data-json-editor="true" id="runInputEditor" spellcheck="false" oninput="runInputEdited(this.value)"></textarea>
+      <div class="run-input-status" id="runInputStatus"></div>
+    </div>
+    <div class="modal-f">
+      <button class="btn" onclick="resetRunInputSample()">恢复 Schema 示例</button>
+      <div style="flex:1"></div>
+      <button class="btn" id="validateRunInputBtn" onclick="validateRunInput(true)">校验输入</button>
+      <button class="btn primary" id="runFromInputBtn" onclick="runFromInputPanel()">运行编排</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="knowledgeDeleteMask" role="dialog" aria-modal="true" aria-labelledby="knowledgeDeleteTitle">
+  <div class="modal confirm-modal">
+    <div class="modal-h">
+      <div class="modal-t" id="knowledgeDeleteTitle">删除知识库</div>
+      <div style="flex:1"></div>
+      <button class="btn ghost sm" id="knowledgeDeleteClose" onclick="closeKnowledgeDelete()">关闭</button>
+    </div>
+    <div class="modal-b">
+      <div class="confirm-warning"><b>此操作不可撤销</b><br>将物理删除知识库、全部文档、切片、记忆真源和向量索引。</div>
+      <div class="confirm-target" id="knowledgeDeleteTarget">—</div>
+      <div class="hint" id="knowledgeDeleteSummary"></div>
+      <div class="fld" style="margin-top:14px">
+        <label id="knowledgeDeleteLabel">输入知识库 code 以确认</label>
+        <input class="inp mono" id="knowledgeDeleteInput" autocomplete="off" spellcheck="false" oninput="knowledgeDeleteInputChanged()">
+      </div>
+      <div class="confirm-error" id="knowledgeDeleteError"></div>
+    </div>
+    <div class="modal-f">
+      <div style="flex:1"></div>
+      <button class="btn" id="knowledgeDeleteCancel" onclick="closeKnowledgeDelete()">取消</button>
+      <button class="btn danger" id="knowledgeDeleteConfirm" onclick="confirmKnowledgeDelete(this)" disabled>确认删除</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="agentPurgeMask" role="dialog" aria-modal="true" aria-labelledby="agentPurgeTitle">
+  <div class="modal confirm-modal" style="width:min(760px,100%)">
+    <div class="modal-h">
+      <div><div class="modal-t" id="agentPurgeTitle">永久删除归档 Agent</div><div class="card-s mono" id="agentPurgeTarget">—</div></div>
+      <div style="flex:1"></div>
+      <button class="btn ghost sm" id="agentPurgeClose" onclick="closeAgentPurge()">关闭</button>
+    </div>
+    <div class="modal-b">
+      <div class="confirm-warning"><b>此操作不可撤销</b><br>将物理删除 Agent、历史版本、运行与审核记录，以及它独占的编排图和知识库。共享资源只解除归属，不会被误删。</div>
+      <div id="agentPurgePreview" style="margin-top:14px"><div class="empty">正在分析影响范围…</div></div>
+      <div class="fld" style="margin-top:14px">
+        <label id="agentPurgeLabel">输入 Agent code 以确认</label>
+        <input class="inp mono" id="agentPurgeInput" autocomplete="off" spellcheck="false" oninput="agentPurgeInputChanged()">
+      </div>
+      <div class="confirm-error" id="agentPurgeError"></div>
+    </div>
+    <div class="modal-f">
+      <div class="hint" style="margin:0">Skill、LLM 模型、凭证和安全审计始终保留。</div>
+      <div style="flex:1"></div>
+      <button class="btn" id="agentPurgeCancel" onclick="closeAgentPurge()">取消</button>
+      <button class="btn danger" id="agentPurgeConfirm" onclick="confirmAgentPurge(this)" disabled>永久删除</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="memoryWriteMask" role="dialog" aria-modal="true" aria-labelledby="memoryWriteTitle">
+  <div class="modal memory-modal">
+    <div class="modal-h">
+      <div><div class="modal-t" id="memoryWriteTitle">写入长期记忆</div><div class="card-s" id="memoryWriteSub">写入 MySQL 真源并建立 Milvus 索引</div></div>
+      <div style="flex:1"></div>
+      <button class="btn ghost sm" onclick="closeMemoryWrite()">关闭</button>
+    </div>
+    <div class="modal-b">
+      <div class="frm">
+        <div class="fld">
+          <label>知识库（knowledge_base） <b>*</b></label>
+          <select class="inp" id="memoryKnowledge"></select>
+        </div>
+        <div class="fld">
+          <label>记忆类型（memory_type）</label>
+          <select class="inp" id="memoryType">
+            <option value="semantic">semantic · 事实/知识</option>
+            <option value="episodic">episodic · 事件/经历</option>
+            <option value="profile">profile · 用户偏好</option>
+            <option value="procedural">procedural · 流程/方法</option>
+          </select>
+        </div>
+        <div class="fld wide">
+          <label>标题（title） <b>*</b></label>
+          <input class="inp" id="memoryTitle" maxlength="255" autocomplete="off" placeholder="概括这条记忆的内容">
+        </div>
+        <div class="fld wide">
+          <label>正文（content） <b>*</b></label>
+          <textarea class="inp memory-editor" id="memoryContent" spellcheck="false" placeholder="填写需要长期保存并参与检索的事实或结论"></textarea>
+        </div>
+        <div class="fld">
+          <label>重要度（importance，0-1）</label>
+          <input class="inp" id="memoryImportance" type="number" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div class="fld">
+          <label>记忆 ID（memory_id）</label>
+          <input class="inp mono" id="memoryId" readonly placeholder="保存后由服务端生成">
+        </div>
+      </div>
+      <div class="memory-meta" id="memoryMeta">租户、敏感级别与保留期限由所选知识库决定；操作会记录当前登录用户。</div>
+      <div class="confirm-error" id="memoryWriteError"></div>
+    </div>
+    <div class="modal-f">
+      <div style="flex:1"></div>
+      <button class="btn" onclick="closeMemoryWrite()">取消</button>
+      <button class="btn primary" id="memoryWriteSubmit" onclick="submitMemory()">确认写入</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="reviewTemplatePreviewMask" role="dialog" aria-modal="true" aria-labelledby="reviewTemplatePreviewTitle" onclick="reviewTemplatePreviewBackdrop(event)">
+  <div class="modal review-preview-modal">
+    <div class="modal-h">
+      <div><div class="modal-t" id="reviewTemplatePreviewTitle">业务审核效果预览</div><div class="card-s">使用当前编辑区和 sample_data，不保存任何数据</div></div>
+      <div style="flex:1"></div>
+      <button class="btn ghost sm" type="button" onclick="closeReviewTemplateDirectPreview()">关闭</button>
+    </div>
+    <div class="modal-b" id="reviewTemplatePreviewBody"><div class="empty">正在生成预览…</div></div>
+    <div class="modal-f"><div class="hint" style="margin:0">按钮和表单仅展示效果，不能在预览中提交审核。</div><div style="flex:1"></div><button class="btn primary" type="button" onclick="closeReviewTemplateDirectPreview()">返回编辑</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="./assets/demo-runtime.js"></script>
+<script src="./assets/console.js"></script>
+<script src="./assets/demo-ui.js"></script>
+</body>
+</html>
