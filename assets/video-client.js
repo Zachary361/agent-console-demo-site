@@ -7,7 +7,7 @@
   try{token=localStorage.getItem(key)||'';}catch{}
   async function request(route,method='GET',data,asBlob=false){
     const response=await nativeFetch(base+route,{method,headers:{...(token?{Authorization:'Bearer '+token}:{}),...(data!==undefined?{'Content-Type':'application/json'}:{})},body:data===undefined?undefined:JSON.stringify(data),signal:AbortSignal.timeout(30000)});
-    if(!response.ok){const body=await response.json().catch(()=>({}));const e=new Error(body.error||'服务连接失败');e.status=response.status;throw e;}
+    if(!response.ok){const body=await response.json().catch(()=>({}));const e=new Error(body.error||'服务连接失败');e.status=response.status;e.code=body.code;e.details=body.details;throw e;}
     return asBlob?response.blob():response.json();
   }
   let connecting;

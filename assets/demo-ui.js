@@ -4,7 +4,9 @@
   const unavailable = /^(openWizard|builderNewSession|builderSend|builderCreateDraft|builderValidate|builderDeleteSession|govSave|govEval|govPromote|govAlias|govDelete|openAgentPurge|confirmAgentPurge|saveAgentAccess|deleteGraph|runNodeTest|approveRun|cancelLiveWait|authFeishuLogin|authLocalLogin|authLogout|knowledge(?:Upload|Create|Save|Put|Delete|Search|DocumentAction)|openKnowledge|confirmKnowledge|memoryWrite|openMemoryWrite|submitMemory|deleteMemory|manageRecallDocument|project(?:Save|Delete|Toggle|Token)|openProject|account(?:Save|Toggle|Sync)|model(?:Create|Save|Add|Test|Promote|Deprecate)|openModel|credential(?:Create|Save|Rotate|State|Delete)|openCredential|evaluation(?:Save|Delete|Start)|openEvaluation|trigger(?:Save|Set|Rotate|Test|Replay|Delete)|openTrigger|node(?:Create|Save|Set)|openNode(?:Create|Instance)|skill(?:New|Create|Install|Inspect|Run|Test|Promote|Deprecate|Start|Save|Discover)|reviewTemplate(?:Generate|Create|Publish|Save|Delete|SetStable|Deprecate|Archive|Purge|DirectPreview|Validate)|openReviewTemplate|pm(?:Save|Create|Rollback|RenderPreview)|openPrompt)/;
   const readonlyViews=new Set(['builder','trigger','skill','knowledge','prompt','model','review-template','evaluation','context','project','credential','account','node']);
   function blocked(button) {
-    if(button.closest('[data-video-workbench]')||button.dataset.videoControl==='true')return false;
+    if(button.closest('[data-workflow-control], #wizMask, #runInputMask'))return false;
+    if(/^openWizard\(/.test(button.getAttribute('onclick')||''))return /openWizard\('version'/.test(button.getAttribute('onclick')) && GOV.code==='demo.welcome';
+    if(/^govEditIdentity\(/.test(button.getAttribute('onclick')||''))return true;
     const handler=button.getAttribute('onclick')||'';
     return unavailable.test(handler.trim())||/saveGraph\(true\)/.test(handler)||/^(新建|新增|安装|上传|发布|同步|写入|创建|生成方案|轮换|保存授权)/.test(button.textContent.trim())&&button.closest('.view')?.id!=='view-canvas';
   }
@@ -26,9 +28,9 @@
     });
     const palette=document.getElementById('palette');
     if(palette) for(const option of palette.options){
-      const disabled=!['start','llm','end'].includes(option.value);
+      const disabled=!['start','llm','end','image_to_video'].includes(option.value);
       if(option.disabled!==disabled)option.disabled=disabled;
-      if(disabled)option.title='本地演示仅支持开始、模拟模型输出和结束节点';
+      if(disabled)option.title='演示支持开始、模板输出、图生视频和结束节点';
     }
     if(palette&&palette.selectedOptions[0]?.disabled)palette.value='llm';
   }

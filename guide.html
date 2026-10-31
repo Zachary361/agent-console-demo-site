@@ -1,1 +1,17 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>脱敏演示使用说明</title><style>body{font:16px/1.8 system-ui;background:#f6f7f9;color:#253047;margin:0}main{max-width:850px;margin:60px auto;background:white;border:1px solid #e1e4ea;border-radius:12px;padding:36px}h1{font-size:26px}h2{font-size:19px}a{color:#4f46e5}code{background:#f4f4fa;padding:3px 7px}.note{background:#fff7e8;border:1px solid #f3d39b;padding:14px;border-radius:6px}li{margin:8px 0}</style></head><body><main><a href="./index.html">← 返回 Agent 中台</a><h1>图生视频 Demo 使用说明</h1><p class="note">无需 SSO 或 GitHub 登录。已有图生视频 Agent，支持新增自己的 Agent。当前视频为图片镜头动效演示，未接入真实 AI 模型。</p><h2>生成第一个视频</h2><ol><li>进入「图生视频任务」，选择「图生视频 Agent」。</li><li>点击「用示例图」，或上传 PNG / JPEG（最大 4 MB，边长不超过 4096）。</li><li>填写提示词，选择 3 / 5 / 8 秒、画幅与镜头效果。</li><li>点击「提交生成任务」，右侧自动显示排队、生成和完成状态。</li><li>选择完成的任务，即可播放并下载 MP4。</li></ol><h2>创建自己的 Agent</h2><p>进入「我的 Agent」→「新建 Agent」，填写名称、用途说明和默认提示词。保存后点击「创建视频任务」。刷新页面后仍保留在当前工作区。</p><h2>任务管理</h2><p>支持搜索、状态筛选、查看进度与日志、取消任务、再生成一次，以及删除历史任务。重试会创建新任务，保留原记录。每个工作区最多保留 20 个任务，同时最多运行或排队 3 个。</p><h2>演示边界</h2><p>后端实际保存数据、排队并编码 MP4。提示词仅保存，画面运动由「镜头」选项决定，不会生成新的主体动作。企业登录、知识库、审核等原型模块仍未接入。</p><h2>数据与可用性</h2><p>图片和视频上传并保存于演示后端，不同浏览器工作区相互隔离。凭证保存在当前浏览器；清除站点数据会失去原工作区入口。删除任务会清理没有其他任务引用的文件。</p><p>当前在线后端为临时演示通道，依赖演示电脑和进程持续运行。若显示后端不可达，请稍后点击「重新连接」。长期使用需部署到常驻服务器。</p><h2>原欢迎语示例</h2><p>「编排画布」仍可执行欢迎语模拟。顶部「重置欢迎语示例」只重置旧版浏览器示例，不会删除视频工作区。</p></main></body></html>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>脱敏演示使用说明</title><style>body{font:16px/1.8 system-ui;background:#f6f7f9;color:#253047;margin:0}main{max-width:850px;margin:60px auto;background:white;border:1px solid #e1e4ea;border-radius:12px;padding:36px}h1{font-size:26px}h2{font-size:19px}a{color:#4f46e5}code{background:#f4f4fa;padding:3px 7px}.note{background:#fff7e8;border:1px solid #f3d39b;padding:14px;border-radius:6px}li{margin:8px 0}</style></head><body><main><a href="./index.html">← 返回 Agent 中台</a><h1>用原画布建立图生视频 Agent</h1>
+<p class="note">无需 SSO。图生视频与欢迎语演示位于同一 Agent 注册表。当前是图片镜头动效演示，未接 AI 模型。</p>
+<h2>新建与编排</h2><ol>
+<li>进入「Agent 治理」→「新建 Agent」，填写 code（如 demo.product_video）和名称，选择「图生视频模板」或「空白画布」。</li>
+<li>下一步确认输入输出契约，创建后点击「在画布打开」。</li>
+<li>选择模板会得到可编辑的「开始 → 图生视频 → 结束」。空白图需在工具栏添加图生视频节点，点击原开始到结束的连线，在下方摘要删除旧连线，再从节点输出圆点拖至下一节点。看不到节点时点「适应」。</li>
+<li>双击图生视频节点，设置 3/5/8 秒、横屏/竖屏/方形、推近/平移/静态，输出路径为 <code>variables.video</code>。双击结束节点，来源路径也填 <code>variables.video</code>。</li>
+<li>点击「校验」→「保存草稿」。</li></ol>
+<h2>运行与结果</h2><ol>
+<li>点击「运行参数」，上传 PNG/JPEG（≤4 MB、边长≤4096）或点击「使用示例图片」。</li>
+<li>在输入 JSON 中填写 <code>prompt</code>，保留 image 占位符，点击「运行编排」。</li>
+<li>在原运行检查器查看节点进度、日志及结果，播放并下载 MP4。「查看运行追踪」可以查看同一次运行的输入输出、视频和重试。</li>
+</ol><h2>版本与数据</h2><p>画布试运行执行当前节点和连线快照，时长与画幅来自视频节点配置。保存草稿不覆盖旧 Agent 版本；需要固定新图时，在 Agent 治理中创建新版本。重试沿用原运行快照。</p>
+<p>新 Agent、编排和任务保存到当前浏览器对应的匿名后端工作区。刷新后仍在；清除站点数据会失去入口。图片、视频上传并保存于演示后端，不同工作区隔离。每工作区最多 20 条历史任务，不自动过期。</p>
+<h2>演示范围</h2><p>后端实际按图执行、排队和生成 MP4。提示词仅记录，不会生成新主体动作。支持顺序图和一个视频节点。未接入的生产发布、评测、知识库、审核、基本信息编辑和删除 Agent 等操作禁用。欢迎语原示例仍由浏览器规则运行。</p>
+<p>当前后端是临时演示通道，依赖演示电脑和进程运行；连接失败可在 Agent 治理点击「重新连接」。长期使用需部署到常驻服务器。顶部「重置欢迎语示例」只重置浏览器欢迎语数据。</p>
+</main></body></html>

@@ -9,10 +9,10 @@
 <title>Agent 中台 · 脱敏演示</title>
 <link rel="stylesheet" href="./assets/console.css">
 <link rel="stylesheet" href="./assets/demo.css">
-<link rel="stylesheet" href="./assets/video.css">
+<link rel="stylesheet" href="./assets/workflow.css?v=3">
 </head>
 <body>
-<aside id="demoBanner"><strong>脱敏演示</strong><span>图生视频演示 · 图片与任务保存于匿名工作区 · 当前为镜头动效，未接入 AI 模型</span><a href="./guide.html">使用说明</a><button id="demoReset" type="button">重置欢迎语示例</button></aside>
+<aside id="demoBanner"><strong>脱敏演示</strong><span>画布编排演示 · 新建 Agent → 配置节点 → 运行追踪 · 图生视频为镜头动效，未接 AI 模型</span><a href="./guide.html">使用说明</a><button id="demoReset" type="button">重置欢迎语示例</button></aside>
 <div class="app">
   <aside class="sidebar">
     <div class="brand">
@@ -292,7 +292,7 @@
           <button class="btn sm" id="saveGraphAsBtn" onclick="saveGraphAs()">另存为新图</button>
           <button class="btn sm danger" id="deleteGraphBtn" onclick="deleteGraph(this)">删除编排图</button>
           <span style="flex:1"></span>
-          <span class="card-s">连好后点「校验 → 保存 → 运行」，本地按这张图模拟执行</span>
+          <span class="card-s">连好后点「校验 → 保存 → 运行」，按当前画布逐节点执行</span>
         </div>
         <div id="vbar"></div>
 
@@ -328,8 +328,6 @@
                 <div style="display:flex;gap:14px;font-size:11px;color:var(--muted)">
                   <span>节点 <b style="color:var(--text)" id="gNodeCount">3</b></span>
                   <span>边 <b style="color:var(--text)" id="gEdgeCount">2</b></span>
-                  <span>最大重试 <b style="color:var(--text)">2</b></span>
-                  <span>checkpointer <b style="color:var(--text)">Tiered</b></span>
                 </div>
               </div>
             </div>
@@ -879,7 +877,7 @@
         <div class="page-h">
           <div>
             <div class="page-t">Agent 治理</div>
-            <div class="page-s">注册 · 不可变版本 · 评测准入 · 灰度与发布 · 依赖与审计（只读取本地虚构数据）</div>
+            <div class="page-s">注册身份与契约 · 绑定独立编排图 · 在画布保存并试运行（生产发布未接入）</div>
           </div>
           <div style="display:flex;gap:8px">
             <button class="btn" onclick="loadGov(GOV.code)">刷新</button>
@@ -1076,7 +1074,7 @@
             <input class="inp" id="wTokens" type="number" min="1000" step="1000" value="2000000">
           </div>
           <div class="fld wide">
-            <label class="chk"><input type="checkbox" id="wPublish" checked onchange="wizPreview()"> 创建后评测并发布（publish_after_create）</label>
+            <label class="chk"><input type="checkbox" id="wPublish" disabled onchange="wizPreview()"> 创建后评测并发布（本演示未接入，创建后可在画布试运行）</label>
           </div>
           <div class="fld wide">
             <div class="sub-t">请求预览</div>
@@ -1237,11 +1235,13 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="./assets/video-config.js"></script>
-<script src="./assets/video-client.js"></script>
-<script src="./assets/demo-runtime.js"></script>
-<script src="./assets/console.js"></script>
-<script src="./assets/demo-ui.js"></script>
-<script src="./assets/video-app.js"></script>
+<script src="./assets/video-config.js?v=3"></script>
+<script src="./assets/video-client.js?v=3"></script>
+<script src="./assets/demo-runtime.js?v=3"></script>
+<script src="./assets/workflow-core.js?v=3"></script>
+<script src="./assets/workflow-client.js?v=3"></script>
+<script src="./assets/console.js?v=3"></script>
+<script src="./assets/demo-ui.js?v=3"></script>
+<script src="./assets/workflow-canvas.js?v=3"></script>
 </body>
 </html>

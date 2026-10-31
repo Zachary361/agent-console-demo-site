@@ -3,7 +3,6 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
 function go(v, opts){
-  if(v === 'govern' && window.VideoApp) return window.VideoApp.open('agents');
   if(v !== 'canvas' && CANVAS_FOCUS.active) setCanvasFocus(false);
   $$('.view').forEach(e=>e.classList.remove('active'));
   $('#view-'+v).classList.add('active');
@@ -350,7 +349,7 @@ async function probe(force=false){
 function applyMode(){
   const b = document.getElementById('modeBadge');
   if(b){
-    b.textContent = MODE === 'live' ? 'DEMO · 本地演示' : 'OFFLINE · 后端不可用';
+    b.textContent = MODE === 'live' ? 'DEMO · 画布演示' : 'OFFLINE · 后端不可用';
     b.style.background = MODE === 'live' ? 'var(--green-soft)' : 'var(--amber-soft)';
     b.style.color = MODE === 'live' ? 'var(--green)' : 'var(--amber)';
     b.style.borderColor = MODE === 'live' ? '#c9e8d4' : '#f2ddba';
@@ -1149,6 +1148,8 @@ async function loadGraph(gid){
 
 function renderGraph(){
   buildCanvas();
+  if($("#gNodeCount")) $("#gNodeCount").textContent=GRAPH.nodes.length;
+  if($("#gEdgeCount")) $("#gEdgeCount").textContent=GRAPH.edges.length;
   const listed = GRAPHS.find(item => item.graph_id === GRAPH.id);
   const status = GRAPH.status === 'published' ? '已发布' : (GRAPH.status === 'draft' ? '草稿' : (GRAPH.status || '本地'));
   const owner = canvasAgentCode() ? 'Agent ' + canvasAgentCode() : '未绑定';
@@ -3723,7 +3724,7 @@ function finalizeLive(){
   const L = LIVE;
   const run = {
     id: L.runId || ('r_' + Math.random().toString(36).slice(2, 8).toUpperCase()),
-    agent: GRAPH.id, version: (GRAPH.version || 'local'),
+    agent: canvasAgentCode() || GRAPH.id, version: CUR.version || 'local', graph_id: GRAPH.id, graph_version: GRAPH.version,
     time: new Date().toTimeString().slice(0, 8),
     total: L.cursor, tokens: L.totalTok, status: L.runStatus, spans: L.spans,
     trace: L.traceId || '', retry: L.retry || 0, error: L.error || null,
@@ -3741,7 +3742,7 @@ function finalizeLive(){
   $('#runState').textContent = sb.label;
   $('#runState').className = 'badge ' + sb.cls;
   $('#sse').textContent = L.sseLines.join('\n');
-  toast(`本地模拟运行完成 · ${L.cursor}ms · ${fmt(L.totalTok)} tokens`);
+  toast(`编排执行结束 · ${L.cursor}ms · ${fmt(L.totalTok)} tokens`);
   refreshSummary();
   if($('#view-obs').classList.contains('active')) loadObs();
   // Worker 滚动升级期间，旧事件可能只有 error_code；run 快照仍有完整字段级详情。
