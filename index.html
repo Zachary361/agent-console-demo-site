@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self' https://structure-maria-lead-hansen.trycloudflare.com; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta charset="utf-8">
 <link rel="icon" href="data:,">
@@ -9,9 +9,10 @@
 <title>Agent 中台 · 脱敏演示</title>
 <link rel="stylesheet" href="./assets/console.css">
 <link rel="stylesheet" href="./assets/demo.css">
+<link rel="stylesheet" href="./assets/video.css">
 </head>
 <body>
-<aside id="demoBanner"><strong>脱敏演示</strong><span>虚构示例 · 数据仅存于当前浏览器 · 模型调用、企业登录、审核与发布未接入</span><a href="./guide.html">使用说明</a><button id="demoReset" type="button">重置示例</button></aside>
+<aside id="demoBanner"><strong>脱敏演示</strong><span>图生视频演示 · 图片与任务保存于匿名工作区 · 当前为镜头动效，未接入 AI 模型</span><a href="./guide.html">使用说明</a><button id="demoReset" type="button">重置欢迎语示例</button></aside>
 <div class="app">
   <aside class="sidebar">
     <div class="brand">
@@ -1236,8 +1237,11 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="./assets/video-config.js"></script>
+<script src="./assets/video-client.js"></script>
 <script src="./assets/demo-runtime.js"></script>
 <script src="./assets/console.js"></script>
 <script src="./assets/demo-ui.js"></script>
+<script src="./assets/video-app.js"></script>
 </body>
 </html>

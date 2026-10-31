@@ -3,6 +3,7 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
 function go(v, opts){
+  if(v === 'govern' && window.VideoApp) return window.VideoApp.open('agents');
   if(v !== 'canvas' && CANVAS_FOCUS.active) setCanvasFocus(false);
   $$('.view').forEach(e=>e.classList.remove('active'));
   $('#view-'+v).classList.add('active');
@@ -8783,7 +8784,7 @@ $('#runState').className='badge run';
     if($('#view-credential').classList.contains('active')) await loadCredentialPage(CREDENTIAL_GOV.code);
     if($('#view-skill').classList.contains('active')) await loadSkillPage(SKILL_GOV.code);
     if($('#view-account').classList.contains('active')) await loadAccountPage();
-    toast('已加载脱敏演示 · 运行结果由本地规则模拟');
+    toast('已加载脱敏演示 · 欢迎语示例由本地规则模拟');
   }
 })();
 /* ============ 人工审核模板治理 ============ */
