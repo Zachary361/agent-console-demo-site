@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="./assets/workflow.css?v=3">
 </head>
 <body>
-<aside id="demoBanner"><strong>脱敏演示</strong><span>画布编排演示 · 新建 Agent → 配置节点 → 运行追踪 · 图生视频为镜头动效，未接 AI 模型</span><a href="./guide.html">使用说明</a><button id="demoReset" type="button">重置欢迎语示例</button></aside>
+<aside id="demoBanner"><strong>脱敏演示</strong><span>Agent 搭建与管理演示 · 定义契约 → 画布编排 → 试运行 → 运行追踪 · 示例未接真实 AI 模型</span><a href="./guide.html">使用说明</a><button id="demoReset" type="button">重置欢迎语示例</button></aside>
 <div class="app">
   <aside class="sidebar">
     <div class="brand">
@@ -145,6 +145,7 @@
           </div>
         </div>
 
+        <p class="card-s" style="margin:0 0 16px;line-height:1.7">演示数据说明：运行汇总使用本地欢迎语记录，尚未完整接入当前 Agent / 24h 后端统计；队列、审核与环境状态主要为演示值或空态。实际任务请查看运行追踪。<a href="./guide.html#overview-metrics" style="color:var(--accent)">查看指标说明</a></p>
         <div class="overview-kpis">
           <div class="card kpi"><div class="kpi-l" id="ovRunsL">24h 运行 · 当前 Agent</div><div class="kpi-v" id="ovRuns">—</div><div class="kpi-d" id="ovTok">—</div></div>
           <div class="card kpi"><div class="kpi-l">成功率</div><div class="kpi-v" id="ovSucc">—</div><div class="kpi-d" id="ovSuccD">—</div></div>
@@ -1242,6 +1243,6 @@
 <script src="./assets/workflow-client.js?v=3"></script>
 <script src="./assets/console.js?v=3"></script>
 <script src="./assets/demo-ui.js?v=3"></script>
-<script src="./assets/workflow-canvas.js?v=3"></script>
+<script src="./assets/workflow-canvas.js?v=3.1"></script>
 </body>
 </html>

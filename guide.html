@@ -1,17 +1,77 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>脱敏演示使用说明</title><style>body{font:16px/1.8 system-ui;background:#f6f7f9;color:#253047;margin:0}main{max-width:850px;margin:60px auto;background:white;border:1px solid #e1e4ea;border-radius:12px;padding:36px}h1{font-size:26px}h2{font-size:19px}a{color:#4f46e5}code{background:#f4f4fa;padding:3px 7px}.note{background:#fff7e8;border:1px solid #f3d39b;padding:14px;border-radius:6px}li{margin:8px 0}</style></head><body><main><a href="./index.html">← 返回 Agent 中台</a><h1>用原画布建立图生视频 Agent</h1>
-<p class="note">无需 SSO。图生视频与欢迎语演示位于同一 Agent 注册表。当前是图片镜头动效演示，未接 AI 模型。</p>
-<h2>新建与编排</h2><ol>
-<li>进入「Agent 治理」→「新建 Agent」，填写 code（如 demo.product_video）和名称，选择「图生视频模板」或「空白画布」。</li>
-<li>下一步确认输入输出契约，创建后点击「在画布打开」。</li>
-<li>选择模板会得到可编辑的「开始 → 图生视频 → 结束」。空白图需在工具栏添加图生视频节点，点击原开始到结束的连线，在下方摘要删除旧连线，再从节点输出圆点拖至下一节点。看不到节点时点「适应」。</li>
-<li>双击图生视频节点，设置 3/5/8 秒、横屏/竖屏/方形、推近/平移/静态，输出路径为 <code>variables.video</code>。双击结束节点，来源路径也填 <code>variables.video</code>。</li>
-<li>点击「校验」→「保存草稿」。</li></ol>
-<h2>运行与结果</h2><ol>
-<li>点击「运行参数」，上传 PNG/JPEG（≤4 MB、边长≤4096）或点击「使用示例图片」。</li>
-<li>在输入 JSON 中填写 <code>prompt</code>，保留 image 占位符，点击「运行编排」。</li>
-<li>在原运行检查器查看节点进度、日志及结果，播放并下载 MP4。「查看运行追踪」可以查看同一次运行的输入输出、视频和重试。</li>
-</ol><h2>版本与数据</h2><p>画布试运行执行当前节点和连线快照，时长与画幅来自视频节点配置。保存草稿不覆盖旧 Agent 版本；需要固定新图时，在 Agent 治理中创建新版本。重试沿用原运行快照。</p>
-<p>新 Agent、编排和任务保存到当前浏览器对应的匿名后端工作区。刷新后仍在；清除站点数据会失去入口。图片、视频上传并保存于演示后端，不同工作区隔离。每工作区最多 20 条历史任务，不自动过期。</p>
-<h2>演示范围</h2><p>后端实际按图执行、排队和生成 MP4。提示词仅记录，不会生成新主体动作。支持顺序图和一个视频节点。未接入的生产发布、评测、知识库、审核、基本信息编辑和删除 Agent 等操作禁用。欢迎语原示例仍由浏览器规则运行。</p>
-<p>当前后端是临时演示通道，依赖演示电脑和进程运行；连接失败可在 Agent 治理点击「重新连接」。长期使用需部署到常驻服务器。顶部「重置欢迎语示例」只重置浏览器欢迎语数据。</p>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Agent 中台 · 演示使用说明</title>
+<style>
+body{font:16px/1.8 system-ui;background:#f6f7f9;color:#253047;margin:0}main{max-width:850px;margin:48px auto;background:white;border:1px solid #e1e4ea;border-radius:12px;padding:36px}h1{font-size:26px}h2{font-size:19px;margin-top:30px}a{color:#4f46e5}code{background:#f4f4fa;padding:3px 7px;overflow-wrap:anywhere}.note{background:#fff7e8;border:1px solid #f3d39b;padding:14px;border-radius:6px}li{margin:8px 0}.flow{background:#f5f4ff;border:1px solid #dedaf6;border-radius:6px;padding:14px}details{border:1px solid #e1e4ea;border-radius:6px;padding:12px 16px;margin:12px 0}summary{cursor:pointer;font-weight:600}dt{font-weight:600;margin-top:12px}dd{margin:3px 0 12px;color:#526078}@media(max-width:640px){main{margin:12px;padding:20px}h1{font-size:23px}}
+</style>
+</head>
+<body><main>
+<a href="./index.html">← 返回 Agent 中台</a>
+<h1>演示使用说明</h1>
+<p>Agent 中台是一套用于搭建、调试和管理 Agent 的工具。你可以为不同业务任务创建独立 Agent，定义输入输出，通过画布组织处理步骤，再查看每次执行的结果与过程。欢迎语和图生视频是这套通用流程中的两个案例。</p>
+<p class="note">这是脱敏演示版，无需 SSO。示例使用虚构数据；部分流程已接入演示后端，其他模块用于展示平台设计，具体可用范围见下文。</p>
+
+<h2>跑通一个示例</h2>
+<ol>
+<li>打开「Agent 治理」，选择「欢迎语演示」，点击「在画布打开」。</li>
+<li>查看「开始 → 模板输出 → 结束」三个节点。双击节点可以查看配置。</li>
+<li>点击「运行参数」，输入 <code>{"name":"演示访客"}</code>，再点击「运行编排」。</li>
+<li>查看节点状态和返回的欢迎语，进入「运行追踪」，选择本次运行，查看节点输入、输出与耗时。</li>
+<li>拖动节点调整布局，点击「保存草稿」。刷新后重新进入该画布，可以继续查看和运行。</li>
+</ol>
+<p>这个示例使用模板规则生成结果，不调用大模型。它用于理解输入、节点、连线、输出和运行记录之间的关系。</p>
+
+<h2>搭建自己的 Agent</h2>
+<p class="flow">明确任务 → 注册 Agent → 定义输入输出 → 画布编排 → 校验并保存 → 试运行 → 查看追踪 → 迭代版本</p>
+<ol>
+<li><strong>明确任务：</strong>先说明给谁用、接收什么信息、完成哪些步骤、最后交付什么结果。</li>
+<li><strong>注册身份：</strong>在「Agent 治理」点击「新建 Agent」，填写唯一编码（例如 <code>demo.my_assistant</code>）、名称、用途与责任信息，按任务选择空白画布或示例模板。</li>
+<li><strong>约定输入输出：</strong>下一步设置输入契约、输出契约和独立编排图。契约规定字段、类型与必填项；运行参数填写的是某一次任务的实际数据。</li>
+<li><strong>配置画布：</strong>添加所需节点，双击编辑参数，从输出圆点拖向下一节点完成连线。执行顺序由连线决定。点击连线可在画布下方摘要中删除；看不到节点时点击「适应」。</li>
+<li><strong>传递数据：</strong>节点读取 <code>input.*</code> 或上游变量，将结果写入 <code>variables.*</code>；结束节点从指定来源路径读取最终结果。上下游路径需要一致。</li>
+<li><strong>保存与运行：</strong>保存节点配置，再点击画布「校验」和「保存草稿」。打开「运行参数」，按当前 Agent 的契约填写输入，校验后运行。</li>
+<li><strong>排查与迭代：</strong>在运行检查器或「运行追踪」查看状态、输入输出及错误。需要固定新的契约和编排绑定时，在治理页创建 Agent 新版本。</li>
+</ol>
+<p>一个 Agent 是可复用的任务能力，一张编排图描述其处理步骤，每次提交输入会产生一次独立运行。保存图草稿与创建 Agent 版本是两个动作；画布试运行执行当前图快照，直接版本调用使用该版本绑定的图修订。</p>
+
+<h2>各模块在整体框架中的作用</h2>
+<p>以下说明平台的职责划分与设计目的，不代表每个模块都已接入真实执行能力。</p>
+<dl>
+<dt>Agent 治理与契约：让任务能力有统一身份</dt><dd>管理用途、责任、输入输出和版本，让调用方知道如何使用，让维护者能追溯变更。</dd>
+<dt>编排画布与节点：把任务拆成可配置步骤</dt><dd>用节点表达处理动作，用连线表达顺序，用变量路径传递数据，让业务流程可以检查和调整。</dd>
+<dt>模型、Prompt、技能工具与知识库：复用底层能力</dt><dd>分别负责模型调用、指令模板、系统操作和资料检索。将这些资源独立管理，便于多个 Agent 共用及按需替换。</dd>
+<dt>触发器、执行与运行追踪：让流程可运行、可定位</dt><dd>平台设计包含手动、接口或事件触发；执行层负责处理任务，追踪层记录每一步发生了什么。当前可体验手动画布运行。</dd>
+<dt>评测、发布、权限与审核：控制变化和使用范围</dt><dd>用于判断版本质量、管理上线范围、授权访问和引入人工确认。这些治理模块目前主要保留原型设计。</dd>
+</dl>
+
+<h2>案例：同一套工具，不同的任务</h2>
+<details><summary>欢迎语：理解最小输入输出流程</summary><p>输入姓名，模板输出节点读取 <code>input.name</code>，把欢迎语写入变量，结束节点返回结果。适合先认识画布和追踪。</p></details>
+<details><summary>图生视频：体验异步任务和文件结果</summary><p>新建时选择图生视频模板，或在空白画布连接「开始 → 图生视频 → 结束」。视频节点输出路径与结束节点来源均使用 <code>variables.video</code>。在节点中设置时长、画幅和镜头，在「运行参数」上传图片或使用示例图片。执行成功后可在检查器与追踪页播放、下载。</p><p>当前视频是 FFmpeg 图片镜头动效，提示词仅记录，未接 AI 视频模型。它用于验证文件输入、后端执行和结果交付这一类流程。</p></details>
+<p>知识问答、反馈分析、内容生成和业务处理助手等，是这一框架可以继续探索的应用方向；需要为具体场景接入模型、资料或工具并验证，当前不代表这些应用已完成。</p>
+
+<h2 id="overview-metrics">概览指标怎么看</h2>
+<p>概览用于判断任务是否顺畅运行，并找到下一步要处理的问题。先看运行量，再看成功率与耗时，最后定位排队、审核和失败原因。</p>
+<dl>
+<dt>24h 运行：有没有在使用、负载有多大</dt><dd>统计时间窗口内的运行次数，用来观察使用变化。一次业务任务可能发生多次重试，因此运行次数不能直接等同于完成的业务任务数。附带的 Token 表示模型用量，不直接等于费用。</dd>
+<dt>成功率：流程是否可靠</dt><dd>关注已结束的运行中有多少执行成功。成功表示系统按约定完成处理，结果是否正确、是否被用户采用，还需要另外评估。正式统计应明确取消任务的处理口径。</dd>
+<dt>P95 延迟：较慢的一批任务体验如何</dt><dd>约 95% 的耗时样本不超过这个值，帮助发现平均耗时掩盖的长尾等待。欢迎语与视频应分场景比较，并区分排队、执行和人工等待时间。</dd>
+<dt>队列任务：处理能力是否跟得上需求</dt><dd>结合最老等待时间与 Worker 容量，判断是否积压，再决定扩容、限流或调整任务优先级。短暂排队不一定是故障。</dd>
+<dt>待人工审核：人机协作是否卡住</dt><dd>显示需要人做决定的任务，重点看等待时长和超时情况。必要审核是质量控制的一部分，不应为了清零而省略。</dd>
+<dt>失败运行：有多少次执行需要处理</dt><dd>用绝对数量判断影响面，结合成功率判断严重程度；进入追踪按 Agent、版本、节点和错误类型定位，再决定修正或重试。</dd>
+</dl>
+<p>运行环境、Worker、Agent 健康排行和最近失败用于定位原因；评测与发布状态用于观察版本变更风险。这些是诊断信息。衡量平台价值还应看首次成功运行率、搭建耗时、达到业务验收标准的任务完成数，以及每个可用结果的成本。</p>
+<p class="note">当前概览保留了正式平台的指标布局，但运行汇总来自本浏览器最多 30 条欢迎语演示记录，尚未按当前 Agent 和近 24 小时完整筛选；队列、审核及环境状态主要是演示值或空态。新建 Agent 的后端运行尚未汇入这套完整统计，请到「运行追踪」查看实际任务。页面数值不能作为真实业务规模、SLA 或模型质量的证明。</p>
+
+<h2>可做与未接入</h2>
+<p>当前可创建 Agent、定义契约、编辑并保存顺序编排、填写运行参数、保存本地测试用例、执行模板或视频示例、查看节点输入输出和运行结果。后端运行支持取消和按原快照重试。</p>
+<p>可执行节点为开始、模板输出（mock）、图生视频和结束；每张图最多一个视频节点。分支、循环、自然语言自动搭建、真实模型调用、知识检索、企业工具调用、人工审批、评测、触发器及生产发布尚未接入。部分治理操作仍禁用，以界面提示为准。</p>
+
+<h2>数据、重置与连接</h2>
+<p>原欢迎语的编排、测试用例与模拟运行保存在当前浏览器。新建 Agent、图版本及后端运行保存在对应的匿名工作区；输入图片内容不会写入测试用例或运行日志，上传素材和生成文件保存在演示后端。</p>
+<p>顶部「重置欢迎语示例」只重置浏览器欢迎语示例，不删除后端工作区。清除站点数据会丢失匿名工作区入口。演示数据不自动过期，请使用示例或非敏感素材。</p>
+<p>请使用桌面浏览器。公开页面可直接访问；当前后端使用临时通道，依赖演示电脑和进程持续运行。若连接失败或注册表只显示欢迎语，可在治理页点击「重新连接」。本地完整启动方式见源码仓库 README。</p>
 </main></body></html>

@@ -22,8 +22,8 @@
   $('#view-govern .page-h').after(connection);
   window.addEventListener('workflow-connection',e=>{const el=$('#workflowConnection');el.textContent=e.detail.message;el.classList.toggle('error',!e.detail.ok);});
   $('#workflowReconnect').onclick=async()=>{try{await api.reconnect();await loadGraphList();await loadGov(GOV.code);}catch(e){toast(e.message);}};
-  const note=document.createElement('div');note.className='workflow-guide';note.textContent='与欢迎语相同：新建 Agent → 进入编排画布 → 添加并连接节点 → 保存、运行。图生视频为图片镜头动效演示。';$('#view-govern .page-h').after(note);
-  const canvasNote=document.createElement('div');canvasNote.className='workflow-guide';canvasNote.textContent='图生视频：开始 → 图生视频 → 结束。双击节点配置时长、画幅与镜头；结束节点来源填 variables.video；图片在「运行参数」上传。';$('#view-canvas .page-h').after(canvasNote);
+  const note=document.createElement('div');note.className='workflow-guide';note.textContent='新建 Agent → 定义输入输出 → 编排画布 → 保存并试运行 → 查看追踪。可从空白画布或示例模板开始。';$('#view-govern .page-h').after(note);
+  const canvasNote=document.createElement('div');canvasNote.className='workflow-guide';canvasNote.textContent='双击节点编辑配置，从输出圆点拖向下一节点连线。用 input.* 读取本次输入，用 variables.* 传递结果；结束节点读取最终输出。';$('#view-canvas .page-h').after(canvasNote);
   const template=document.createElement('div');template.className='fld wide';template.innerHTML='<label for="wTemplate">起始编排</label><select class="inp" id="wTemplate"><option value="video">图生视频模板（进入画布后可编辑）</option><option value="blank">空白画布（手动添加、连接节点）</option><option value="welcome">欢迎语模板</option></select><div class="hint">模板只提供起点，运行时执行你在画布中配置的节点和连线。</div>';$('#wizStep1 .frm').prepend(template);
   const applyTemplate=()=>{
     const kind=$('#wTemplate').value,welcome=kind==='welcome';
@@ -36,7 +36,7 @@
   const originalWizard=openWizard;
   openWizard=async function(mode,opts){await originalWizard(mode,opts);template.hidden=mode==='version';if(mode!=='version'){applyTemplate();$('#wProject').value='demo';}$('#wPublish').checked=false;$('#wVis').value='internal';$('#wVis').disabled=true;};
   for(const sel of ['#wContextPolicy','#wQps','#wTokens','#wPublish'])$(sel).closest('.fld').hidden=true;
-  $('#wCode').placeholder='demo.product_video';$('#wName').placeholder='商品图生视频 Agent';
+  $('#wCode').placeholder='demo.my_assistant';$('#wName').placeholder='业务助手';
   const originalStarter=starterGraphDsl;
   starterGraphDsl=(gid,name)=>WIZ.mode==='agent'?C.templateGraph(gid,name,$('#wTemplate').value,$('#wCode').value.trim()):originalStarter(gid,name);
   const originalGraphOptions=renderWizardGraphOptions;
