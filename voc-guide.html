@@ -1,0 +1,742 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>VOC Agent · Schema 与使用教程</title><link rel="stylesheet" href="./assets/voc.css?v=4"></head><body class="voc-app"><main class="voc-shell"><a href="./index.html">← 返回 Agent 中台</a><header class="voc-head"><div><h1>VOC 双 Agent · Schema 与使用教程</h1><p>评论原声 → 结构化标签 → 按款归纳 → 双方确认 → 演示 PLM 任务</p></div></header>
+<div class="voc-notice">当前使用可解释的关键词规则，未接真实 AI 模型。图片只保存链接，不读取图片内容；所有标签需人工核对。人种/族裔仅记录用户主动自述；价格表达不代表个人财富或实际消费能力。</div>
+<section class="voc-card"><h2>1. 两个 Agent 怎么用</h2><ol><li>在「Agent 治理」选择「VOC 评论打标」，点「在画布打开」。画布是开始 → VOC 评论打标 → 结束。</li><li>点击「运行参数」→「填入虚构样例」，按款号填写评论后校验并运行。结果可展开查看标签、原声证据、场景与自述信息。</li><li>在治理页打开「VOC 款式改善与工单」。在运行参数中选择刚才完成的打标运行，点击「使用这次打标结果」。</li><li>运行第二张图：归纳排序 → 创建工单 → 人工确认。运行会停在确认节点，进入「审核工作台」。</li><li>查看频次、低星、严重度、点赞和证据。必要时修改优先级/建议并填写原因，保存后重新提交。修改会清空旧确认。</li><li>分别切换设计师、企划角色确认同一修订。只有双方都通过后才恢复画布并创建演示 PLM 任务，可查看任务 ID、源工单、款号、处理建议及责任角色。</li></ol><p>也可用「新建 Agent」选择两种 VOC 模板，系统自动带入可编辑契约与独立编排图。需要从头搭建时选择空白画布并添加上述节点。</p></section>
+<section class="voc-card"><h2>2. Schema 是规则，input 是本次填写的数据</h2><p>input_schema 规定调用方必须提供哪些字段、类型及取值范围；output_schema 规定流程最终必须返回什么结构。把 Schema 粘贴到新建向导的契约框，把实际评论 JSON 粘贴到运行参数框。</p><table><thead><tr><th>关键字</th><th>怎么写</th><th>为什么</th></tr></thead><tbody><tr><td>type</td><td>object / array / string / integer / number / boolean / null</td><td>对象、列表、文字、整数、小数、真假、未知值</td></tr><tr><td>properties</td><td>字段名对应一份规则</td><td>说明每个字段的含义和限制</td></tr><tr><td>required</td><td>["style_code","reviews"]</td><td>字段必需出现；非空还需 minLength</td></tr><tr><td>items</td><td>数组中每条评论的规则</td><td>一批多条评论，避免重复设计字段</td></tr><tr><td>enum</td><td>固定选项列表</td><td>一级标签只能是约定的五类</td></tr><tr><td>minimum / maximum</td><td>星级1–5、点赞≥0</td><td>阻断无效数值</td></tr><tr><td>additionalProperties</td><td>false</td><td>拼错字段及时报错，避免静默丢弃</td></tr><tr><td>type: ["number","null"]</td><td>有依据填数字，否则 null</td><td>未知不是0，也不需要编造一个值</td></tr></tbody></table><p>本 Demo 支持上述基础关键字；不支持 $ref、$defs、oneOf 等高级契约语法。字段的 default 是示例提示，不保证服务端自动补值。</p></section>
+<section class="voc-card"><h2>3. 第一位 Agent 的输入怎么写</h2><p>一批一个款号，最多50条评论。review_id 用于去重；rating 是数值，不要写成 "五星"。没有图片填 []；用户名或地区未知可填空字符串。self_reported 是可选对象，只放用户明确自述；身高用厘米、体重用公斤，不能混单位。</p><pre>{
+  "style_code": "DEMO-TS-001",
+  "reviews": [
+    {
+      "review_id": "R001",
+      "review_text": "穿去通勤，搭配牛仔裤。身高168cm，体重60kg。洗一次就起球，袖子太长，这个价格太贵。",
+      "rating": 2,
+      "helpful_count": 12,
+      "images": [],
+      "user_name": "演示用户A",
+      "user_address": "示例城市"
+    }
+  ]
+}</pre><details><summary>完整 input_schema（可复制到契约编辑器）</summary><pre>{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "style_code": {
+      "type": "string",
+      "maxLength": 80,
+      "minLength": 1,
+      "description": "款号；一批只分析一个款式"
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1
+          },
+          "review_text": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "helpful_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 2000,
+              "description": "评论图片链接；演示只保留引用，不分析图片，不从图片推断个人属性"
+            },
+            "maxItems": 5
+          },
+          "user_name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "user_address": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "建议仅填国家/城市；不用于推断人种或消费能力"
+          },
+          "self_reported": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "height_cm": {
+                "type": "number",
+                "minimum": 50,
+                "maximum": 250
+              },
+              "weight_kg": {
+                "type": "number",
+                "minimum": 10,
+                "maximum": 350
+              },
+              "ethnicity": {
+                "type": "string",
+                "maxLength": 60,
+                "description": "仅限用户主动自述，缺失即未知，不作推断"
+              },
+              "budget_yuan": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100000
+              }
+            },
+            "required": []
+          }
+        },
+        "required": [
+          "review_id",
+          "review_text",
+          "rating",
+          "helpful_count",
+          "images",
+          "user_name",
+          "user_address"
+        ]
+      },
+      "maxItems": 50,
+      "minItems": 1
+    }
+  },
+  "required": [
+    "style_code",
+    "reviews"
+  ]
+}</pre></details></section>
+<section class="voc-card"><h2>4. 第一位 Agent 的输出怎么写</h2><p>一条评论可能同时反映多个问题，因此 issue_tags 是数组，每项成对保存一级/二级标签。场景、搭配、体型、族裔自述和价格表达是独立维度，不塞进五类问题标签。每条问题都有原声 evidence，便于人工复核。</p><table><thead><tr><th>一级标签</th><th>短二级标签</th></tr></thead><tbody><tr><td>面料</td><td>起球、扎肤、闷热、太薄、缩水</td></tr><tr><td>尺码</td><td>偏大、偏小、尺码不准</td></tr><tr><td>版型</td><td>肩部不合、腰部不合、袖长不合、衣长不合、裤长不合</td></tr><tr><td>质量</td><td>开线、破损、拉链故障、褪色</td></tr><tr><td>其他问题</td><td>异味、色差、包装问题、发错货、价格偏高</td></tr></tbody></table><p>未匹配问题时 issue_tags=[]；身高体重未知用 null；场景与搭配未知用 []；族裔用“未知”、source=unknown。当前不推断这些属性。</p><pre>{
+  "review_id": "R001",
+  "review_text": "穿去通勤，搭配牛仔裤。身高168cm，体重60kg。洗一次就起球，袖子太长，这个价格太贵。",
+  "rating": 2,
+  "helpful_count": 12,
+  "images": [],
+  "issue_tags": [
+    {
+      "primary_label": "面料",
+      "secondary_label": "起球",
+      "evidence": "洗一次就起球，袖子太长，这个价格太贵",
+      "severity": 2
+    },
+    {
+      "primary_label": "版型",
+      "secondary_label": "袖长不合",
+      "evidence": "洗一次就起球，袖子太长，这个价格太贵",
+      "severity": 1
+    },
+    {
+      "primary_label": "其他问题",
+      "secondary_label": "价格偏高",
+      "evidence": "洗一次就起球，袖子太长，这个价格太贵",
+      "severity": 1
+    }
+  ],
+  "usage_scenarios": [
+    "通勤"
+  ],
+  "outfit_tags": [
+    "牛仔裤"
+  ],
+  "profile": {
+    "height_cm": 168,
+    "weight_kg": 60,
+    "body_evidence": "身高168cm；体重60kg",
+    "ethnicity": "未知",
+    "ethnicity_source": "unknown",
+    "price_tag": "价格敏感",
+    "budget_yuan": null,
+    "price_evidence": "洗一次就起球，袖子太长，这个价格太贵"
+  },
+  "needs_review": true,
+  "notes": [
+    "规则匹配结果，需人工核对语境"
+  ]
+}</pre><details><summary>完整 output_schema</summary><pre>{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "style_code": {
+      "type": "string",
+      "maxLength": 80,
+      "minLength": 1
+    },
+    "taxonomy_version": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "mode": {
+      "type": "string",
+      "maxLength": 30
+    },
+    "tagged_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1
+          },
+          "review_text": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "helpful_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 2000,
+              "description": "评论图片链接；演示只保留引用，不分析图片，不从图片推断个人属性"
+            },
+            "maxItems": 5
+          },
+          "issue_tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "primary_label": {
+                  "type": "string",
+                  "maxLength": 10,
+                  "enum": [
+                    "面料",
+                    "尺码",
+                    "版型",
+                    "质量",
+                    "其他问题"
+                  ]
+                },
+                "secondary_label": {
+                  "type": "string",
+                  "maxLength": 12,
+                  "enum": [
+                    "起球",
+                    "扎肤",
+                    "闷热",
+                    "太薄",
+                    "缩水",
+                    "偏大",
+                    "偏小",
+                    "尺码不准",
+                    "肩部不合",
+                    "腰部不合",
+                    "袖长不合",
+                    "衣长不合",
+                    "裤长不合",
+                    "开线",
+                    "破损",
+                    "拉链故障",
+                    "褪色",
+                    "异味",
+                    "色差",
+                    "包装问题",
+                    "发错货",
+                    "价格偏高"
+                  ]
+                },
+                "evidence": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "minLength": 1
+                },
+                "severity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3
+                }
+              },
+              "required": [
+                "primary_label",
+                "secondary_label",
+                "evidence",
+                "severity"
+              ]
+            },
+            "maxItems": 30
+          },
+          "usage_scenarios": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 16
+            },
+            "maxItems": 10
+          },
+          "outfit_tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 16
+            },
+            "maxItems": 10
+          },
+          "profile": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "height_cm": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 50,
+                "maximum": 250
+              },
+              "weight_kg": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 10,
+                "maximum": 350
+              },
+              "body_evidence": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "ethnicity": {
+                "type": "string",
+                "maxLength": 60
+              },
+              "ethnicity_source": {
+                "type": "string",
+                "maxLength": 30,
+                "enum": [
+                  "user_self_reported",
+                  "unknown"
+                ]
+              },
+              "price_tag": {
+                "type": "string",
+                "maxLength": 20,
+                "enum": [
+                  "未知",
+                  "预算明确",
+                  "价格敏感",
+                  "可接受溢价"
+                ]
+              },
+              "budget_yuan": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 100000
+              },
+              "price_evidence": {
+                "type": "string",
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "height_cm",
+              "weight_kg",
+              "body_evidence",
+              "ethnicity",
+              "ethnicity_source",
+              "price_tag",
+              "budget_yuan",
+              "price_evidence"
+            ]
+          },
+          "needs_review": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "maxItems": 10
+          }
+        },
+        "required": [
+          "review_id",
+          "review_text",
+          "rating",
+          "helpful_count",
+          "images",
+          "issue_tags",
+          "usage_scenarios",
+          "outfit_tags",
+          "profile",
+          "needs_review",
+          "notes"
+        ]
+      },
+      "maxItems": 50,
+      "minItems": 1
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 200
+      },
+      "maxItems": 10
+    }
+  },
+  "required": [
+    "style_code",
+    "taxonomy_version",
+    "mode",
+    "tagged_reviews",
+    "limitations"
+  ]
+}</pre></details></section>
+<section class="voc-card"><h2>5. 第二位 Agent：承接输出，生成可确认的改善任务</h2><p>第二位 Agent 的 input_schema 与第一位的 output_schema 相同，可原样承接 style_code、tagged_reviews 等字段。系统按评论 ID 去重；重复 ID 内容冲突时要求修正。一级/二级组合及证据会再次校验。</p><p>排序默认：40×问题评论占比 + 30×该问题低星占比 + 25×严重度/3 + 5×min(点赞总数/20,1)。低星默认≤2，权重合计100，可在归纳节点配置。P1≥70，P2≥40，其余P3。这是演示规则，正式投产应按业务数据校准；样本中的问题频次不等于销量口径的缺陷率。</p><p>待确认时运行状态为 waiting_human，方案 ID 是中间结果；双方确认并创建演示任务后，结束节点才按 output_schema 验证最终输出。</p><pre>{
+  "style_code": "DEMO-TS-001",
+  "plan_id": "voc_example",
+  "status": "completed",
+  "tasks": [
+    {
+      "task_id": "plm_example",
+      "work_order_id": "wo_example",
+      "title": "DEMO-TS-001 · 起球",
+      "priority": "P1",
+      "status": "待处理"
+    }
+  ],
+  "message": "双方确认后创建演示 PLM 任务，未写入真实 PLM"
+}</pre><details><summary>第二位 Agent 的完整 input_schema</summary><pre>{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "style_code": {
+      "type": "string",
+      "maxLength": 80,
+      "minLength": 1
+    },
+    "taxonomy_version": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "mode": {
+      "type": "string",
+      "maxLength": 30
+    },
+    "tagged_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1
+          },
+          "review_text": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "helpful_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 2000,
+              "description": "评论图片链接；演示只保留引用，不分析图片，不从图片推断个人属性"
+            },
+            "maxItems": 5
+          },
+          "issue_tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "primary_label": {
+                  "type": "string",
+                  "maxLength": 10,
+                  "enum": [
+                    "面料",
+                    "尺码",
+                    "版型",
+                    "质量",
+                    "其他问题"
+                  ]
+                },
+                "secondary_label": {
+                  "type": "string",
+                  "maxLength": 12,
+                  "enum": [
+                    "起球",
+                    "扎肤",
+                    "闷热",
+                    "太薄",
+                    "缩水",
+                    "偏大",
+                    "偏小",
+                    "尺码不准",
+                    "肩部不合",
+                    "腰部不合",
+                    "袖长不合",
+                    "衣长不合",
+                    "裤长不合",
+                    "开线",
+                    "破损",
+                    "拉链故障",
+                    "褪色",
+                    "异味",
+                    "色差",
+                    "包装问题",
+                    "发错货",
+                    "价格偏高"
+                  ]
+                },
+                "evidence": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "minLength": 1
+                },
+                "severity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3
+                }
+              },
+              "required": [
+                "primary_label",
+                "secondary_label",
+                "evidence",
+                "severity"
+              ]
+            },
+            "maxItems": 30
+          },
+          "usage_scenarios": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 16
+            },
+            "maxItems": 10
+          },
+          "outfit_tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 16
+            },
+            "maxItems": 10
+          },
+          "profile": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "height_cm": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 50,
+                "maximum": 250
+              },
+              "weight_kg": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 10,
+                "maximum": 350
+              },
+              "body_evidence": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "ethnicity": {
+                "type": "string",
+                "maxLength": 60
+              },
+              "ethnicity_source": {
+                "type": "string",
+                "maxLength": 30,
+                "enum": [
+                  "user_self_reported",
+                  "unknown"
+                ]
+              },
+              "price_tag": {
+                "type": "string",
+                "maxLength": 20,
+                "enum": [
+                  "未知",
+                  "预算明确",
+                  "价格敏感",
+                  "可接受溢价"
+                ]
+              },
+              "budget_yuan": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 100000
+              },
+              "price_evidence": {
+                "type": "string",
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "height_cm",
+              "weight_kg",
+              "body_evidence",
+              "ethnicity",
+              "ethnicity_source",
+              "price_tag",
+              "budget_yuan",
+              "price_evidence"
+            ]
+          },
+          "needs_review": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "maxItems": 10
+          }
+        },
+        "required": [
+          "review_id",
+          "review_text",
+          "rating",
+          "helpful_count",
+          "images",
+          "issue_tags",
+          "usage_scenarios",
+          "outfit_tags",
+          "profile",
+          "needs_review",
+          "notes"
+        ]
+      },
+      "maxItems": 50,
+      "minItems": 1
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 200
+      },
+      "maxItems": 10
+    }
+  },
+  "required": [
+    "style_code",
+    "taxonomy_version",
+    "mode",
+    "tagged_reviews",
+    "limitations"
+  ]
+}</pre></details><details><summary>第二位 Agent 的完整 output_schema</summary><pre>{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "style_code": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "plan_id": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "status": {
+      "type": "string",
+      "maxLength": 40
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "work_order_id": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "priority": {
+            "type": "string",
+            "maxLength": 5
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 30
+          }
+        },
+        "required": [
+          "task_id",
+          "work_order_id",
+          "title",
+          "priority",
+          "status"
+        ]
+      },
+      "maxItems": 30
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 300
+    }
+  },
+  "required": [
+    "style_code",
+    "plan_id",
+    "status",
+    "tasks",
+    "message"
+  ]
+}</pre></details></section>
+<section class="voc-card"><h2>6. 画布中的数据怎么传</h2><table><thead><tr><th>节点</th><th>读取</th><th>写入</th></tr></thead><tbody><tr><td>VOC 打标</td><td>input</td><td>variables.tags</td></tr><tr><td>第一张图结束</td><td>variables.tags</td><td>第一位 Agent 输出</td></tr><tr><td>第二张图归纳</td><td>input（上一步完整输出）</td><td>variables.summary</td></tr><tr><td>创建工单</td><td>variables.summary</td><td>variables.plan</td></tr><tr><td>双方确认</td><td>variables.plan</td><td>variables.approved</td></tr><tr><td>演示 PLM</td><td>variables.approved</td><td>variables.delivery</td></tr><tr><td>第二张图结束</td><td>variables.delivery</td><td>第二位 Agent 输出</td></tr></tbody></table><p>字段路径需要上下游一致。没有问题时正常结束且不造工单；一方退回后等待修改重提；取消会终止待办；重复确认不会重复创建任务。</p></section></main></body></html>

@@ -28,9 +28,9 @@
     });
     const palette=document.getElementById('palette');
     if(palette) for(const option of palette.options){
-      const disabled=!['start','llm','end','image_to_video'].includes(option.value);
+      const disabled=!['start','llm','end','image_to_video','voc_tag','voc_aggregate','voc_workorders','voc_review','plm_task'].includes(option.value);
       if(option.disabled!==disabled)option.disabled=disabled;
-      if(disabled)option.title='演示支持开始、模板输出、图生视频和结束节点';
+      if(disabled)option.title='本演示支持顺序执行、视频与 VOC 节点';
     }
     if(palette&&palette.selectedOptions[0]?.disabled)palette.value='llm';
   }

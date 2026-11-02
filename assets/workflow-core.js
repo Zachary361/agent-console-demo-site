@@ -28,6 +28,7 @@
   const welcomeInput={type:'object',required:['name'],additionalProperties:false,properties:{name:{type:'string',minLength:1,maxLength:80,default:'演示访客'}}};
   const welcomeOutput={type:'object',required:['greeting'],properties:{greeting:{type:'string'}}};
   function templateGraph(id,name,kind='video',owner='') {
+    if(['voc_tag','voc_analysis'].includes(kind))return globalThis.VocCore.graph(id,name,kind,owner);
     const nodes=[{id:'start',type:'start',x:90,y:150,config:{copy_input:true,load_context:false}}];
     if(kind==='video')nodes.push({id:'video',type:'image_to_video',display_name:'图生视频',x:370,y:150,timeout:90,config:{image_path:'input.image',prompt_path:'input.prompt',seconds:5,ratio:'landscape',motion:'zoom',output_path:'variables.video'}});
     if(kind==='welcome')nodes.push({id:'welcome',type:'llm',x:370,y:150,config:{mock_output:{greeting:'你好，{{input.name}}！这是本地演示。'},output_path:'variables.answer'}});
@@ -47,7 +48,7 @@
       if(graph.nodes.filter(n=>n.type==='image_to_video').length>1)errors.push('当前演示每张图最多一个图生视频节点');
       for(const n of graph.nodes) {
         if(!/^[a-zA-Z0-9_-]{1,64}$/.test(n.id))errors.push('节点 ID 仅支持字母、数字、下划线与连字符');
-        if(!['start','llm','image_to_video','end'].includes(n.type))errors.push('演示尚未实现节点：'+n.type);
+        if(!['start','llm','image_to_video','voc_tag','voc_aggregate','voc_workorders','voc_review','plm_task','end'].includes(n.type))errors.push('演示尚未实现节点：'+n.type);
         const c=n.config || {};
         if(n.type==='start' && c.load_context)errors.push('当前演示未接入上下文加载，请关闭 load_context');
         if(n.type==='llm' && (!c.mock_output || typeof c.mock_output!=='object'))errors.push(n.id+' 需配置 mock_output；未接真实模型');
@@ -60,6 +61,16 @@
           if(!['landscape','portrait','square'].includes(c.ratio))errors.push(n.id+' 画幅无效');
           if(!['zoom','pan','static'].includes(c.motion))errors.push(n.id+' 镜头无效');
         }
+        if(['voc_tag','voc_aggregate','voc_workorders','voc_review','plm_task'].includes(n.type)){
+          if(c.input_path!=='input'&&c.input_path!=='variables'&&!safePath(c.input_path))errors.push(n.id+' 输入路径无效');
+          if(!safePath(c.output_path)||!c.output_path.startsWith('variables.'))errors.push(n.id+' 输出路径必须位于 variables 下');
+        }
+        if(n.type==='voc_aggregate'){
+          const w=c.weights;
+          if(!w||Object.keys(w).sort().join(',')!=='frequency,helpful,low_rating,severity'||Object.values(w).some(v=>!Number.isFinite(v)||v<0)||Math.abs(Object.values(w||{}).reduce((a,b)=>a+b,0)-100)>0.001)errors.push('VOC 权重需包含 frequency/low_rating/severity/helpful 且合计100');
+          if(!Number.isInteger(c.low_rating_max)||c.low_rating_max<1||c.low_rating_max>3)errors.push('低星阈值为1–3的整数');
+        }
+        if(n.type==='plm_task'&&c.mode!=='demo')errors.push('PLM 当前仅支持 demo 模式');
       }
       for(const e of graph.edges){if(!nodes.has(e.from)||!nodes.has(e.to))errors.push('连线引用不存在的节点');if(e.condition)errors.push('演示仅支持无条件顺序连线');}
       const visited=new Set();let current=graph.entry;
@@ -72,6 +83,12 @@
       }
       if(nodes.get(current)?.type!=='end')errors.push('流程必须到达结束节点');
       if(visited.size!==nodes.size)errors.push('存在未连入流程的节点');
+      const ordered=[...visited].map(id=>nodes.get(id));
+      for(const type of ['voc_workorders','voc_review','plm_task'])if(ordered.filter(n=>n.type===type).length>1)errors.push('每张图最多一个 '+type+' 节点');
+      const orders=ordered.findIndex(n=>n.type==='voc_workorders'),review=ordered.findIndex(n=>n.type==='voc_review'),plm=ordered.findIndex(n=>n.type==='plm_task');
+      if(plm>=0&&(review<0||review>=plm||orders<0||orders>=review))errors.push('PLM 之前必须依次创建工单、完成人工确认');
+      if(review>=0&&(orders<0||orders>=review))errors.push('人工确认之前必须创建工单');
+      if(orders>=0&&!ordered.slice(0,orders).some(n=>n.type==='voc_aggregate'))errors.push('创建工单之前必须有 VOC 归纳节点');
     }catch(e){errors.push(e.message);}
     return {ok:!errors.length,errors:[...new Set(errors)],warnings:[]};
   }
@@ -80,7 +97,8 @@
     safeObject(s);
     if(!s || typeof s!=='object' || Array.isArray(s) || depth>8)throw Error('契约结构无效或嵌套过深');
     for(const k of Object.keys(s))if(!schemaKeys.has(k))throw Error('演示契约暂不支持关键字：'+k);
-    if(!['object','array','string','number','integer','boolean','null'].includes(s.type))throw Error('契约需声明支持的 type');
+    const types=Array.isArray(s.type)?s.type:[s.type];
+    if(!types.length||types.some(type=>!['object','array','string','number','integer','boolean','null'].includes(type)))throw Error('契约需声明支持的 type');
     if(s.properties){if(typeof s.properties!=='object'||Array.isArray(s.properties))throw Error('properties 必须为对象');for(const v of Object.values(s.properties))checkSchema(v,depth+1);}
     if(s.required && (!Array.isArray(s.required)||s.required.some(k=>typeof k!=='string'||forbidden.has(k))))throw Error('required 必须是字段名数组');
     if(s.additionalProperties!==undefined&&typeof s.additionalProperties!=='boolean')throw Error('additionalProperties 仅支持布尔值');
@@ -90,6 +108,10 @@
     return true;
   }
   function validateValue(value,s,path='input') {
+    if(Array.isArray(s.type)){
+      const options=s.type.map(type=>validateValue(value,{...s,type},path));
+      return options.some(errors=>!errors.length)?[]:[path+' 应符合类型 '+s.type.join(' / ')];
+    }
     const errors=[];let typeOK=true;
     if(s.type==='object')typeOK=value!==null&&typeof value==='object'&&!Array.isArray(value);
     else if(s.type==='array')typeOK=Array.isArray(value);

@@ -3,6 +3,7 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
 function go(v, opts){
+  if(v==='review'){location.href='./review.html';return;}
   if(v !== 'canvas' && CANVAS_FOCUS.active) setCanvasFocus(false);
   $$('.view').forEach(e=>e.classList.remove('active'));
   $('#view-'+v).classList.add('active');

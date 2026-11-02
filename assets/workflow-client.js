@@ -20,7 +20,7 @@
           while(!stopped){
             const result=await request('/v1/runs/'+runId+'/events?start='+cursor);
             for(const ev of result.items){if(stopped)return;controller.enqueue(encoder.encode('id: '+(++cursor)+'\nevent: '+ev.type+'\ndata: '+JSON.stringify(ev)+'\n\n'));}
-            if(!follow||['succeeded','failed','cancelled'].includes(result.status))break;
+            if(!follow||['succeeded','failed','cancelled','waiting_human'].includes(result.status))break;
             await new Promise(r=>setTimeout(r,350));
           }
           if(!stopped)controller.close();
@@ -47,6 +47,7 @@
         const result=await merged(path+url.search,options);result.items.sort((a,b)=>b.created_at-a.created_at);return json(result);
       }
       const data=options.body?JSON.parse(options.body):undefined;
+      if(path.startsWith('/v1/voc/')||path==='/v1/reviews')return json(await request(path+url.search,method,data));
       if(path==='/v1/runs'&&method==='POST'&&data.agent!=='demo.welcome'){
         const run=await request(path,method,data);window.dispatchEvent(new CustomEvent('workflow-run',{detail:run}));return data.stream?eventsResponse(run.run_id,0,true):json(run,201);
       }
