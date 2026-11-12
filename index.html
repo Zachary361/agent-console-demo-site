@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="./assets/voc.css?v=20261112-1">
 <link rel="stylesheet" href="./assets/support.css?v=20261112-1">
 <link rel="stylesheet" href="./assets/support-team.css?v=20261112-1">
-<link rel="stylesheet" href="./assets/node-guidance.css?v=20261112-1">
+<link rel="stylesheet" href="./assets/node-guidance.css?v=20261112-2">
 </head>
 <body>
 <aside id="demoBanner"><strong>Agent 工作空间</strong><span>定义契约 · 编排流程 · 调试运行 · 记录保存在当前浏览器</span><a href="./guide.html">使用说明</a><button id="demoReset" type="button">重置欢迎语示例</button></aside>
@@ -980,8 +980,9 @@
       <button class="node-config-tab" data-tab="help" onclick="setNodeEditorTab('help')">使用说明</button>
     </div>
     <div class="modal-b" id="detailBody"><div class="empty">请选择节点</div></div>
+    <div id="nodeConfigFeedback" role="alert" hidden></div>
     <div class="modal-f">
-      <div class="hint" id="nodeConfigHint" style="margin:0">保存后写入当前画布草稿，仍需点击画布顶部“保存草稿”持久化。</div>
+      <div class="hint" id="nodeConfigHint" style="margin:0">保存配置会校验并保存当前画布草稿；取消会撤销本次未保存修改。</div>
       <div style="flex:1"></div>
       <button class="btn" onclick="closeNodeEditor()">取消</button>
       <button class="btn" id="nodeConfigSave" onclick="saveNodeEditor(false)">保存配置</button>
@@ -1250,13 +1251,13 @@
 <script src="./assets/workflow-core.js?v=20261112-1"></script>
 <script src="./assets/workflow-client.js?v=20261112-1"></script>
 <script src="./assets/node-guidance.js?v=20261112-1"></script>
-<script src="./assets/console.js?v=20261112-1"></script>
+<script src="./assets/console.js?v=20261112-2"></script>
 <script src="./assets/demo-ui.js?v=20261112-1"></script>
 <script src="./assets/workflow-canvas.js?v=20261112-1"></script>
 <script src="./assets/voc-canvas.js?v=20261112-1"></script>
 <script src="./assets/support-canvas.js?v=20261112-1"></script>
 <script src="./assets/support-team-ui.js?v=20261112-1"></script>
 <script src="./assets/support-team-canvas.js?v=20261112-1"></script>
-<script src="./assets/node-guidance-ui.js?v=20261112-1"></script>
+<script src="./assets/node-guidance-ui.js?v=20261112-2"></script>
 </body>
 </html>
