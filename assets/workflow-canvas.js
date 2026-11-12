@@ -24,11 +24,11 @@
   $('#workflowReconnect').onclick=async()=>{try{await api.reconnect();await loadGraphList();await loadGov(GOV.code);}catch(e){toast(e.message);}};
   const note=document.createElement('div');note.className='workflow-guide';note.textContent='新建 Agent → 定义输入输出 → 编排画布 → 保存并试运行 → 查看追踪。可从空白画布或示例模板开始。';$('#view-govern .page-h').after(note);
   const canvasNote=document.createElement('div');canvasNote.className='workflow-guide';canvasNote.textContent='双击节点编辑配置，从输出圆点拖向下一节点连线。用 input.* 读取本次输入，用 variables.* 传递结果；结束节点读取最终输出。';$('#view-canvas .page-h').after(canvasNote);
-  const template=document.createElement('div');template.className='fld wide';template.innerHTML='<label for="wTemplate">起始编排</label><select class="inp" id="wTemplate"><option value="welcome">欢迎语模板（最小示例）</option><option value="blank">空白画布（手动添加、连接节点）</option><option value="video">图生视频模板</option><option value="voc_tag">VOC 评论打标模板</option><option value="voc_analysis">VOC 款式改善与双确认工单模板</option></select><div class="hint">模板只提供起点，运行时执行你在画布中配置的节点和连线。</div>';$('#wizStep1 .frm').prepend(template);
+  const template=document.createElement('div');template.className='fld wide';template.innerHTML='<label for="wTemplate">起始编排</label><select class="inp" id="wTemplate"><option value="welcome">欢迎语模板（最小示例）</option><option value="blank">空白画布（手动添加、连接节点）</option><option value="video">图生视频模板</option><option value="voc_tag">VOC 评论打标模板</option><option value="voc_analysis">VOC 款式改善与双确认工单模板</option><option value="support">多语言智能客服模板（基础）</option><option value="support_team">智能客服多 Agent 协作模板</option></select><div class="hint">模板只提供起点，运行时执行你在画布中配置的节点和连线。</div>';$('#wizStep1 .frm').prepend(template);
   const applyTemplate=()=>{
     const kind=$('#wTemplate').value,welcome=kind==='welcome';
-    $('#wIn').value=JSON.stringify(kind==='voc_tag'?VocCore.inputSchema:kind==='voc_analysis'?VocCore.analysisInput:welcome?C.welcomeInput:kind==='blank'?{type:'object'}:C.inputSchema,null,2);
-    $('#wOut').value=JSON.stringify(kind==='voc_tag'?VocCore.outputSchema:kind==='voc_analysis'?VocCore.analysisOutput:welcome?C.welcomeOutput:kind==='blank'?{type:'object'}:C.outputSchema,null,2);
+    $('#wIn').value=JSON.stringify(kind==='support_team'?SupportTeam.inputSchema:kind==='support'?SupportCore.inputSchema:kind==='voc_tag'?VocV2.inputSchema:kind==='voc_analysis'?VocV2.analysisInput:welcome?C.welcomeInput:kind==='blank'?{type:'object'}:C.inputSchema,null,2);
+    $('#wOut').value=JSON.stringify(kind==='support_team'?SupportTeam.outputSchema:kind==='support'?SupportCore.outputSchema:kind==='voc_tag'?VocV2.outputSchema:kind==='voc_analysis'?VocV2.analysisOutput:welcome?C.welcomeOutput:kind==='blank'?{type:'object'}:C.outputSchema,null,2);
     $('#wContextPolicy').value='{}';$('#wPublish').checked=false;$('#wPublish').disabled=true;
     wizPreview();
   };
@@ -71,17 +71,19 @@
     try {
       const r=await api.request('/v1/runs/'+runId);if(sequences.get(panel)!==seq)return;
       if(panel===livePanel){const voc=r.mode==='rules-demo';$('#runtimeInspector').classList.toggle('voc-runtime',voc);if(voc)panel.parentElement.prepend(panel);else panel.parentElement.append(panel);}
-      const key=r.run_id+':'+r.status+':'+r.progress;if(panel.dataset.key===key&&(!r.hasVideo||panel.querySelector('video')))return;panel.dataset.key=key;
-      const done=['succeeded','failed','cancelled'].includes(r.status),state={queued:'排队中',running:'执行中',succeeded:'已完成',failed:'失败',cancelled:'已取消',waiting_human:'等待设计师与企划确认'}[r.status];
+      const key=r.run_id+':'+r.status+':'+r.progress+':'+(r.support?.conversations.reduce((sum,c)=>sum+c.replies.length,0)||0)+':'+(r.team?.replies.length||0)+':'+(r.team?.calls.length||0);if(panel.dataset.key===key&&(!r.hasVideo||panel.querySelector('video')))return;panel.dataset.key=key;
+      const done=['succeeded','failed','cancelled'].includes(r.status),state={queued:'排队中',running:'执行中',succeeded:'已完成',failed:'失败',cancelled:'已取消',waiting_human:r.annotation_id?'等待标签人工复核':'等待设计师与企划确认'}[r.status];
       panel.innerHTML=`<div class="workflow-result-head"><b>编排结果</b><span class="badge ${r.status==='succeeded'?'ok':r.status==='failed'?'fail':'wait'}">${state}</span></div><div class="hint mono">${esc(r.agent)} · ${esc(r.graph_id||'历史视频任务')} · ${esc(r.graph_version)}</div>${r.error?`<div class="workflow-error" role="alert">${esc(r.error.message)}</div>`:''}${r.hasVideo?'<div class="workflow-media">正在加载视频…</div><div class="hint">图片镜头动效 · 未调用 AI 视频模型</div>':r.status==='succeeded'?`<pre>${esc(JSON.stringify(r.output,null,2))}</pre>`:'<p class="hint">可在运行日志和节点输出中查看执行过程。</p>'}<div class="workflow-actions">${r.hasVideo?'<button class="btn sm primary" data-action="download">下载 MP4</button>':''}${!done?'<button class="btn sm" data-action="cancel">取消运行</button>':!r.legacy?'<button class="btn sm" data-action="retry">按本次编排重试</button>':''}${panel===livePanel?'<button class="btn sm" data-action="trace">查看运行追踪</button>':''}</div>`;
       panel.onclick=async e=>{const btn=e.target.closest('[data-action]');if(!btn)return;btn.disabled=true;try{const act=btn.dataset.action;if(act==='download'){const link=document.createElement('a');link.href=await videoURL(r.videoPath);link.download='canvas-'+r.run_id+'.mp4';link.click();}else if(act==='trace'){await loadServerRuns();go('trace',{noLoad:true});renderTrace(r.run_id);}else if(act==='cancel'){await api.request('/v1/runs/'+r.run_id+'/cancel','POST',{});panel.dataset.key='';await showResult(panel,r.run_id);}else if(act==='retry'){const next=await api.request('/v1/runs/'+r.run_id+'/retry','POST',{});await loadServerRuns();go('trace',{noLoad:true});renderTrace(next.run_id);}}catch(err){toast(err.message);}finally{btn.disabled=false;}};
       if(window.VocUI){const html=VocUI.renderResult(r);if(html){panel.querySelector('pre')?.remove();panel.querySelector('.workflow-actions').insertAdjacentHTML('beforebegin',html);}}
-      if(r.plan_id)panel.querySelector('[data-action="retry"]')?.remove();
+      if(window.SupportTeamUI){const html=SupportTeamUI.renderResult(r);if(html){panel.querySelector('pre')?.remove();panel.querySelector('.workflow-actions').insertAdjacentHTML('beforebegin',html);}}
+      if(window.SupportUI){const html=SupportUI.renderResult(r);if(html){panel.querySelector('pre')?.remove();panel.querySelector('.workflow-actions').insertAdjacentHTML('beforebegin',html);}}
+      if(r.plan_id||r.annotation_id||r.support||r.team)panel.querySelector('[data-action="retry"]')?.remove();
       if(r.hasVideo){const url=await videoURL(r.videoPath);if(sequences.get(panel)!==seq)return;const v=document.createElement('video');v.controls=true;v.playsInline=true;v.preload='metadata';v.src=url;panel.querySelector('.workflow-media').replaceChildren(v);}
     }catch(e){if(sequences.get(panel)===seq){panel.textContent='结果读取失败：'+e.message;panel.dataset.key='';}}
   }
   window.addEventListener('workflow-run',e=>{livePanel.dataset.key='';showResult(livePanel,e.detail.run_id);});
-  const originalLiveEvent=liveEvent;liveEvent=function(ev){originalLiveEvent(ev);if(['run_end','run_paused'].includes(ev.type))showResult(livePanel,ev.run_id);};
+  const originalLiveEvent=liveEvent;liveEvent=function(ev){originalLiveEvent(ev);if(['run_end','run_paused','support_reply','team_reply','team_child_finished'].includes(ev.type))showResult(livePanel,ev.run_id);};
   const originalTrace=renderTrace;renderTrace=function(id){originalTrace(id);showResult(tracePanel,TRACE_SELECTED_RUN_ID);};
   const originalReset=resetRun;resetRun=function(){originalReset();livePanel.hidden=true;livePanel.dataset.key='';};
   const originalWizardBody=wizBody;wizBody=function(){return originalWizardBody().replace('<start → end 最小编排图>','<所选模板生成的可编辑画布>');};

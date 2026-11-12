@@ -350,7 +350,7 @@ async function probe(force=false){
 function applyMode(){
   const b = document.getElementById('modeBadge');
   if(b){
-    b.textContent = MODE === 'live' ? 'DEMO · 画布演示' : 'OFFLINE · 后端不可用';
+    b.textContent = MODE === 'live' ? '运行服务已连接' : '运行服务未连接';
     b.style.background = MODE === 'live' ? 'var(--green-soft)' : 'var(--amber-soft)';
     b.style.color = MODE === 'live' ? 'var(--green)' : 'var(--amber)';
     b.style.borderColor = MODE === 'live' ? '#c9e8d4' : '#f2ddba';
@@ -712,6 +712,7 @@ function switchRouteDefs(node){
 function routeDefsFor(nodeOrType){
   const node = typeof nodeOrType === 'string' ? {type:nodeOrType,config:{}} : nodeOrType;
   if(!node) return [];
+  if(node.type === 'branch')return [{route:'true',label:'是 · true',kind:'fixed'},{route:'false',label:'否 · false',kind:'fixed'}];
   if(node.type === 'switch') return switchRouteDefs(node);
   let routes = COND_SET[node.type] || [];
   if(node.type === 'error_boundary'){
@@ -1219,7 +1220,7 @@ function buildCanvas(){
       ? `↳ <span class="mono">${esc(cfg.agent || '未配置 agent')}</span>`
       : n.type === 'switch'
         ? `↳ <span class="mono">${esc(cfg.selector_path || '未配置 selector_path')}</span>`
-        : `${meta.label} · ${meta.desc}`;
+        : esc(n.description||globalThis.NodeGuideUI?.guide(n)?.purpose||`${meta.label} · ${meta.desc}`);
     const branchDefs = requiredRouteDefsFor(n);
     const connected = new Set(GRAPH.edges.filter(e => e.from === n.id && e.condition).map(e => e.condition));
     const missing = branchDefs.filter(x => !connected.has(x.route));
@@ -1231,9 +1232,10 @@ function buildCanvas(){
       : '';
     const portClass = branchDefs.length ? (missing.length ? ' branch-pending' : ' branch-complete') : '';
     const portTitle = branchDefs.length ? branchTitle : '拖到目标节点连线';
-    const displayName=String(n.display_name||'').trim();
+    const storedName=String(n.display_name||'').trim();
+    const displayName=storedName===n.type?(meta.label||storedName):storedName;
     const el = document.createElement('div');
-    el.className = 'node' + (isSub ? ' sub' : '');
+    el.className = 'node' + (isSub ? ' sub' : '') + (n.type.startsWith('voc_')||n.type.startsWith('cs_')||n.type.startsWith('ma_')||['branch','plm_task'].includes(n.type)?' voc-node':'');
     el.dataset.id = n.id;
     el.dataset.state = 'idle';
     el.style.left = n.x + 'px'; el.style.top = n.y + 'px';
@@ -2653,7 +2655,7 @@ function nodeRuntimePanel(id){
   if(!records.length){
     return `<div class="node-runtime" data-testid="node-runtime-panel">
       <div class="node-runtime-head"><div class="sub-t">本次运行输入输出</div></div>
-      <div class="runtime-io-empty">运行到该节点后，这里会显示脱敏后的输入和输出补丁</div></div>`;
+      <div class="runtime-io-empty">运行到该节点后，这里会显示本次输入和输出补丁</div></div>`;
   }
   const requested = NODE_IO_SELECTED[id];
   const index = Math.max(0, Math.min(records.length-1, requested == null ? records.length-1 : requested));
@@ -2731,7 +2733,7 @@ function renderDetail(){
   const stMap = {idle:['未执行','#6b7280'],running:['执行中','#4f46e5'],done:['成功','#15803d'],wait:['等待人工','#b45309'],error:['失败','#b91c1c']};
   const [txt, color] = stMap[st] || stMap.idle;
   const displayName=String(gn.display_name||'').trim();
-  const instanceDescription=String(gn.description||'').trim();
+  const instanceDescription=String(gn.description||globalThis.NodeGuideUI?.guide(gn)?.purpose||meta.desc||'').trim();
   $('#inspectorSelection').textContent = SELECTED_NODE_IDS.size>1
     ? `已选择 ${SELECTED_NODE_IDS.size} 个节点`
     : (displayName||gn.id);
@@ -2950,6 +2952,7 @@ function configFields(gn){
       let json = ''; try{ json = JSON.stringify(val, null, 2) }catch(e){ json = String(val || '') }
       return `<div class="fld">${label}<textarea class="inp" data-json-editor="true" style="min-height:112px;height:112px;font-size:11.5px;font-family:var(--mono);resize:vertical" placeholder="${attr(s.desc || '')}" onchange="setNodeCfg('${gn.id}','${k}',this.value)">${esc(json)}</textarea></div>`;
     }
+    if(s.multiline)return `<div class="fld">${label}<textarea class="inp voc-prompt-editor" spellcheck="false" onchange="setNodeCfg('${gn.id}','${k}',this.value)">${esc(val)}</textarea></div>`;
     if(s.type === 'number' || s.type === 'integer'){
       const bounds = `${s.minimum != null ? `min="${attr(s.minimum)}"` : ''} ${s.maximum != null ? `max="${attr(s.maximum)}"` : ''}`;
       return `<div class="fld">${label}<input class="inp" type="number" ${s.type === 'integer' ? 'step="1"' : 'step="any"'} ${bounds} style="height:28px;font-size:11.5px" value="${attr(val)}" placeholder="${attr(s.desc || '')}" onchange="setNodeCfg('${gn.id}','${k}',this.value)"></div>`;
@@ -3584,6 +3587,9 @@ function liveEvent(ev){
       openRuntimeInspector('run');
     }
     L.sseLines.push(`id: ${L.sseLines.length+1}  event: run_paused    data: {"status":"${L.runStatus}","node":"${ev.node}"}`);
+  } else if(ev.type === 'branch_selected'){
+    logLine(tag, `分支选择 · ${ev.value_path} = ${ev.condition}`, 'ok');
+    L.sseLines.push(JSON.stringify(ev));
   } else if(ev.type === 'human_resume'){
     logLine(parentId || 'human', '审批提交 · ' + ev.action, 'ok');
   } else if(ev.type === 'human_decision'){
@@ -8786,7 +8792,8 @@ $('#runState').className='badge run';
     if($('#view-credential').classList.contains('active')) await loadCredentialPage(CREDENTIAL_GOV.code);
     if($('#view-skill').classList.contains('active')) await loadSkillPage(SKILL_GOV.code);
     if($('#view-account').classList.contains('active')) await loadAccountPage();
-    toast('已加载脱敏演示 · 欢迎语示例由本地规则模拟');
+    toast('工作空间已连接');
+    window.dispatchEvent(new Event('console-ready'));
   }
 })();
 /* ============ 人工审核模板治理 ============ */

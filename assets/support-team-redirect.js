@@ -1,0 +1,1 @@
+const target=new URL('./index.html',location.href);target.searchParams.set('agent','demo.support_orchestrator');target.searchParams.set('workspace','collaboration');const job=new URLSearchParams(location.search).get('job');if(job)target.searchParams.set('job',job);location.replace(target);

@@ -5,7 +5,7 @@
   let ready;
   const notify=(ok,message)=>window.dispatchEvent(new CustomEvent('workflow-connection',{detail:{ok,message}}));
   async function connect(){
-    if(!ready)ready=api.connect().then(h=>{notify(true,'匿名工作区已连接 · Agent、编排与运行自动保存');return h;}).catch(e=>{ready=null;notify(false,'后端暂不可达：'+e.message);throw e;});
+    if(!ready)ready=api.connect().then(h=>{notify(true,window.PagesAPI?'浏览器工作区已连接 · 编排与运行记录保存在当前浏览器':'匿名工作区已连接 · Agent、编排与运行自动保存');return h;}).catch(e=>{ready=null;notify(false,'运行服务暂不可用：'+e.message);throw e;});
     return ready;
   }
   async function request(path,method='GET',body){await connect();return api.request('/api/video/console'+path,method,body);}

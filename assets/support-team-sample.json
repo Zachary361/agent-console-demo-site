@@ -1,0 +1,30 @@
+{
+  "request_id": "TEST-20261104-001",
+  "conversation": {
+    "conversation_id": "CONV-TEST-001",
+    "customer_id": "CUSTOMER-A",
+    "locale": "zh",
+    "market": "CN",
+    "channel": "web",
+    "policy_date": "2026-11-04",
+    "messages": [
+      {
+        "message_id": "M1",
+        "text": "我的订单 DEMO-1001 什么时候到？",
+        "order_ref": "DEMO-1001"
+      },
+      {
+        "message_id": "M2",
+        "text": "另外这件衣服怎么洗？"
+      }
+    ]
+  },
+  "reply_mode": "hybrid",
+  "simulation": {
+    "order_fault": "none",
+    "knowledge_fault": "none",
+    "draft_fault": "none",
+    "load": "normal",
+    "order_delay_ms": 3500
+  }
+}

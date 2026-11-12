@@ -8,6 +8,7 @@
     if(/^openWizard\(/.test(button.getAttribute('onclick')||''))return /openWizard\('version'/.test(button.getAttribute('onclick')) && GOV.code==='demo.welcome';
     if(/^govEditIdentity\(/.test(button.getAttribute('onclick')||''))return true;
     const handler=button.getAttribute('onclick')||'';
+    if(/^runNodeTest\(/.test(handler)&&window.SupportTeamConsole?.canTestNode())return false;
     return unavailable.test(handler.trim())||/saveGraph\(true\)/.test(handler)||/^(新建|新增|安装|上传|发布|同步|写入|创建|生成方案|轮换|保存授权)/.test(button.textContent.trim())&&button.closest('.view')?.id!=='view-canvas';
   }
   function apply() {
@@ -15,22 +16,22 @@
       if(!blocked(button))return;
       if(!button.disabled)button.disabled=true;
       if(!button.classList.contains('demo-unavailable'))button.classList.add('demo-unavailable');
-      const reason='脱敏演示未接入此后端功能';
+      const reason='此功能尚未配置服务';
       if(button.title!==reason)button.title=reason;
     });
     readonlyViews.forEach(name=>{
       const view=document.getElementById('view-'+name);
       if(view&&!view.querySelector('.demo-note')){
         const note=document.createElement('div');note.className='demo-note';
-        note.textContent='本页保留原型界面，使用空白或虚构数据。依赖后端的新增、调用、审批、发布等操作暂不可用。可运行的示例位于「编排画布」。';
+        note.textContent=name==='model'?'当前客服流程使用内置规则执行，无需选择模型。外部模型服务尚未配置，模型接入需要服务地址、模型标识和服务端凭证。':'此模块尚未配置服务。已配置的任务可在「编排画布」运行。';
         view.prepend(note);
       }
     });
     const palette=document.getElementById('palette');
     if(palette) for(const option of palette.options){
-      const disabled=!['start','llm','end','image_to_video','voc_tag','voc_aggregate','voc_workorders','voc_review','plm_task'].includes(option.value);
+      const disabled=!['start','llm','end','image_to_video','voc_tag','voc_aggregate','voc_workorders','voc_review','plm_task',...Object.keys(window.VocV2?.definitions||{}),...Object.keys(window.SupportCore?.definitions||{}),...Object.keys(window.SupportTeam?.definitions||{})].includes(option.value);
       if(option.disabled!==disabled)option.disabled=disabled;
-      if(disabled)option.title='本演示支持顺序执行、视频与 VOC 节点';
+      if(disabled)option.title='本演示支持顺序执行、条件分支、视频与VOC节点';
     }
     if(palette&&palette.selectedOptions[0]?.disabled)palette.value='llm';
   }
