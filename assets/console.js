@@ -812,7 +812,7 @@ let CANVAS_CLIPBOARD = null;
 const NODE_TESTS = {};
 const NODE_IO_SELECTED = {};
 const TRACE_NODE_SELECTION = {};
-const NODE_EDITOR = {open:false,nodeId:'',tab:'config',dirty:false,snapshot:null};
+const NODE_EDITOR = {open:false,nodeId:'',tab:'config',dirty:false,snapshot:null,pendingConfig:{},errors:{},saving:false};
 const SUBGRAPH_AGENT_OPTIONS = {loading:false,error:'',seq:0};
 
 /* ---- 多 Agent / 多图上下文 ----
@@ -2197,6 +2197,8 @@ function openNodeEditor(id, tab='config'){
   selectNode(id);
   NODE_EDITOR.open=true; NODE_EDITOR.nodeId=id; NODE_EDITOR.tab=tab;
   NODE_EDITOR.dirty=false; NODE_EDITOR.snapshot=cloneCanvasData(GRAPH);
+  NODE_EDITOR.pendingConfig={}; NODE_EDITOR.errors={};
+  showNodeConfigFeedback('');
   $('#nodeConfigDirty')?.classList.remove('on');
   $('#nodeConfigMask')?.classList.add('on');
   document.body.classList.add('node-editor-open');
@@ -2217,11 +2219,13 @@ function finishNodeEditor(){
   $('#nodeConfigMask')?.classList.remove('on');
   document.body.classList.remove('node-editor-open');
   NODE_EDITOR.open=false; NODE_EDITOR.nodeId=''; NODE_EDITOR.dirty=false; NODE_EDITOR.snapshot=null;
+  NODE_EDITOR.pendingConfig={}; NODE_EDITOR.errors={};
   $('#nodeConfigDirty')?.classList.remove('on');
 }
 
 function closeNodeEditor(force=false){
   if(!NODE_EDITOR.open)return true;
+  if(NODE_EDITOR.saving)return false;
   if(NODE_EDITOR.dirty&&!force&&!confirm('当前节点配置尚未保存，关闭后将撤销本次修改。'))return false;
   if(NODE_EDITOR.dirty)restoreNodeEditorSnapshot();
   finishNodeEditor(); return true;
@@ -2229,6 +2233,19 @@ function closeNodeEditor(force=false){
 
 async function saveNodeEditor(runAfter=false){
   const id=NODE_EDITOR.nodeId; if(!id)return;
+  if(NODE_EDITOR.saving)return false;
+  for(const [key,value] of Object.entries(NODE_EDITOR.pendingConfig))setNodeCfg(id,key,value);
+  if(Object.keys(NODE_EDITOR.errors).length){showNodeConfigFeedback('请先修正标红的配置，再保存。');return false;}
+  NODE_EDITOR.saving=true;
+  const mask=$('#nodeConfigMask');
+  mask.querySelectorAll('button,input,select,textarea').forEach(e=>{if(!e.disabled){e.dataset.saveLocked='true';e.disabled=true;}});
+  showNodeConfigFeedback('正在校验并保存当前画布…');
+  let saved=false;
+  try{saved=await saveGraph(false);}finally{
+    NODE_EDITOR.saving=false;
+    mask.querySelectorAll('[data-save-locked]').forEach(e=>{e.disabled=false;delete e.dataset.saveLocked;});
+  }
+  if(!saved){showNodeConfigFeedback(GRAPH_SAVE_ERROR||'保存失败，修改仍保留，请修正后重试。');return false;}
   NODE_EDITOR.snapshot=cloneCanvasData(GRAPH); NODE_EDITOR.dirty=false;
   $('#nodeConfigDirty')?.classList.remove('on');
   if(runAfter){
@@ -2238,8 +2255,19 @@ async function saveNodeEditor(runAfter=false){
     return;
   }
   finishNodeEditor();
-  toast(`节点 ${id} 配置已写入当前画布草稿`);
+  toast(`节点 ${id} 配置与画布草稿已保存，重新打开后保留`);
+  return true;
 }
+
+function showNodeConfigFeedback(message){
+  const el=$('#nodeConfigFeedback');if(el){el.textContent=message;el.hidden=!message;}
+}
+
+function nodeConfigKey(control){return (control?.getAttribute('onchange')||'').match(/setNodeCfg\('[^']+','([^']+)'/)?.[1];}
+document.getElementById('nodeConfigMask').addEventListener('input',event=>{
+  const key=nodeConfigKey(event.target);if(!key||!NODE_EDITOR.open)return;
+  markNodeEditorDirty(NODE_EDITOR.nodeId);NODE_EDITOR.pendingConfig[key]=event.target.value;
+});
 
 function nodeEditorBackdrop(event){
   if(event.target===event.currentTarget)closeNodeEditor();
@@ -2792,6 +2820,16 @@ function renderDetail(){
       </div>
       <div class="path-contract" style="margin-top:12px">更完整的适用场景、前置条件、配置示例和错误处理建议可在“节点管理”中查看。</div>
     </section>`;
+  if(NODE_EDITOR.open){
+    body.querySelectorAll('[onchange]').forEach(control=>{
+      const key=nodeConfigKey(control);if(!key)return;
+      control.dataset.configKey=key;
+      control.setAttribute('aria-label',fieldDisplayName(key));
+      if(Object.hasOwn(NODE_EDITOR.pendingConfig,key)&&control.tagName!=='SELECT')control.value=NODE_EDITOR.pendingConfig[key];
+      const error=NODE_EDITOR.errors[key]||'';
+      control.setAttribute('aria-invalid',String(!!error));control.setCustomValidity?.(error);
+    });
+  }
   if(NODE_EDITOR.open)applyNodeEditorTab();
 }
 
@@ -2799,7 +2837,8 @@ function renderDetail(){
 function configFields(gn){
   const meta = typeMeta(gn.type);
   const schema = meta.config || {};
-  const keys = Object.keys(schema);
+  const group=key=>key.endsWith('_path')||key==='copy_input'?0:key.includes('prompt')?2:key.includes('schema')?3:1;
+  const keys = Object.keys(schema).sort((a,b)=>group(a)-group(b));
   if(!keys.length) return '';
   if(!gn.config) gn.config = {};
   const cfg = gn.config;
@@ -2965,7 +3004,7 @@ function configFields(gn){
   const descs = keys.map(k => (schema[k] && schema[k].desc) ? `· ${k}：${schema[k].desc}` : '').filter(Boolean).join('<br>');
   return `<div style="margin-top:10px;border-top:1px dashed var(--line);padding-top:9px">
     <div class="sub-t">节点配置（${esc(meta.label)}）</div>
-    <div style="display:flex;flex-direction:column;gap:7px">${keys.map(field).join('')}</div>
+    <div style="display:flex;flex-direction:column;gap:10px">${keys.map((key,index)=>`${index===0||group(key)!==group(keys[index-1])?'<div class="ng-field-group">'+['输入与输出绑定','业务规则','提示词配置','JSON 结构约束'][group(key)]+'</div>':''}${field(key)}`).join('')}</div>
     ${gn.type === 'subgraph' && cfg.agent ? `<button class="btn sm" style="width:100%;margin-top:8px"
         onclick="go('govern');govSelect('${esc(cfg.agent)}')">查看子 Agent 的版本与契约</button>` : ''}
     ${(gn.type === 'skill' || (gn.type === 'foreach' && (cfg.target_type || 'skill') === 'skill')) && cfg.skill_code ? `<button class="btn sm" style="width:100%;margin-top:8px"
@@ -2999,10 +3038,26 @@ function setNodeCfg(id, key, val){
   const field = ((typeMeta(gn.type).config || {})[key]) || {};
   try{
     if(field.type === 'boolean') val = val === true || val === 'true';
-    else if(field.type === 'integer') val = val === '' ? null : parseInt(val, 10);
+    else if(field.type === 'integer') val = val === '' ? null : Number(val);
     else if(field.type === 'number') val = val === '' ? null : Number(val);
     else if(field.type === 'object' || field.type === 'json' || field.type === 'array') val = val.trim() ? JSON.parse(val) : (field.type === 'array' ? [] : (field.type === 'object' ? {} : null));
-  }catch(e){ toast(`${key} 不是合法 JSON，未保存`); return; }
+    if(field.required&&(val==null||(typeof val==='string'&&!val.trim())))throw Error('不能为空');
+    if(field.type==='integer'&&!Number.isInteger(val))throw Error('请输入整数');
+    if(field.type==='number'&&!Number.isFinite(val))throw Error('请输入有效数字');
+    if(field.minimum!=null&&val<field.minimum)throw Error('不能小于 '+field.minimum);
+    if(field.maximum!=null&&val>field.maximum)throw Error('不能大于 '+field.maximum);
+    if(field.enum&&!field.enum.includes(val))throw Error('请选择提供的选项');
+    if(field.type==='object'&&(!val||typeof val!=='object'||Array.isArray(val)))throw Error('必须是 JSON 对象');
+    if(field.type==='array'&&!Array.isArray(val))throw Error('必须是 JSON 数组');
+    if(key==='model_output_schema'&&window.WorkflowCore)WorkflowCore.checkSchema(val);
+  }catch(e){
+    const message=fieldDisplayName(key)+'：'+(e instanceof SyntaxError?'不是合法 JSON':e.message);
+    NODE_EDITOR.errors[key]=message;markNodeEditorDirty(id);showNodeConfigFeedback(message);
+    document.querySelectorAll('#detailBody [onchange]').forEach(control=>{if(nodeConfigKey(control)===key){control.setAttribute('aria-invalid','true');control.setCustomValidity?.(message);}});
+    return false;
+  }
+  delete NODE_EDITOR.errors[key];delete NODE_EDITOR.pendingConfig[key];
+  showNodeConfigFeedback(Object.values(NODE_EDITOR.errors).join('；'));
   markNodeEditorDirty(id);
   gn.config[key] = val;
   if(key === 'agent') gn.config.version = 'stable';   // 换 agent 后旧版本号无意义
@@ -3027,6 +3082,7 @@ function setNodeCfg(id, key, val){
     ? `；已移除不适用于当前策略的 ${removedRoutes.map(route => COND_LABEL[route] || route).join('、')} 分支连线`
     : '';
   toast(`节点 ${id} 配置已更新 · ${key}=${val || '空'}${removedNote}`);
+  return true;
 }
 
 function setSwitchCase(id, index, key, raw){
@@ -3255,6 +3311,7 @@ async function validateGraph(){
 }
 
 let GRAPH_SAVE_BUSY=false;
+let GRAPH_SAVE_ERROR='';
 
 function setGraphSaveBusy(publish,busy){
   GRAPH_SAVE_BUSY=busy;
@@ -3270,8 +3327,9 @@ function setGraphSaveBusy(publish,busy){
 }
 
 async function saveGraph(publish){
-  if(GRAPH_SAVE_BUSY)return;
-  if(MODE !== 'live'){ toast('离线模式：图仅保存在浏览器内存'); return; }
+  GRAPH_SAVE_ERROR='';
+  if(GRAPH_SAVE_BUSY){GRAPH_SAVE_ERROR='画布正在保存，请稍后重试。';return false;}
+  if(MODE !== 'live'){GRAPH_SAVE_ERROR='运行工作区未连接，修改尚未保存。';toast(GRAPH_SAVE_ERROR);return false;}
   repairErrorBoundaryConfigs(GRAPH);
   setGraphSaveBusy(!!publish,true);
   try{
@@ -3280,13 +3338,14 @@ async function saveGraph(publish){
       body: JSON.stringify({ dsl: GRAPH, publish: !!publish, owner_agent_code:canvasGraphOwner() })
     });
     const b = await r.json();
-    if(!r.ok){ showVbar('err', b.details || [b.message]); return; }
+    if(!r.ok){GRAPH_SAVE_ERROR=(b.details?.length?b.details:[b.message||'保存失败']).join('；');showVbar('err',[GRAPH_SAVE_ERROR]);return false;}
     GRAPH.version = b.version; GRAPH.status = b.status;
     renderGraph();
     await loadGraphList();
     const action = publish ? '已发布' : (b.draft_reused ? '已更新草稿' : '已创建草稿');
     showVbar('ok', [`${action} ${b.version} · ${b.status}`].concat(b.warnings || []));
-  }catch(e){ showVbar('err', ['保存失败：' + e.message]); }
+    return true;
+  }catch(e){GRAPH_SAVE_ERROR='保存失败：'+e.message;showVbar('err',[GRAPH_SAVE_ERROR]);return false;}
   finally{setGraphSaveBusy(!!publish,false);}
 }
 

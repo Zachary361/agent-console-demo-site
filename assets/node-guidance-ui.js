@@ -20,13 +20,11 @@
   </div>`;}
   window.NodeGuideUI=Object.freeze({guide,panel,table});
   const oldConfig=configFields;configFields=function(n){
-    // The actual cumulative step contract is shown above. The historical model template
-    // is not consumed by the deterministic executor and must not masquerade as runtime I/O.
-    const schema=typeMeta(n.type).config,prior=schema?.model_output_schema,styleFields={tone:schema?.tone,empathy:schema?.empathy};
+    const schema=typeMeta(n.type).config,styleFields={tone:schema?.tone,empathy:schema?.empathy};
     if(n.type==='ma_step'&&(n.config.role!=='style'||n.config.stage!=='tone')){delete schema.tone;delete schema.empathy;}
-    if(n.type==='ma_step')delete schema.model_output_schema;
-    let html;try{html=oldConfig(n);}finally{if(prior)schema.model_output_schema=prior;for(const [k,v]of Object.entries(styleFields))if(v)schema[k]=v;}
-    return panel(n)+'<div class="editor-section-title ng-settings">可编辑配置</div>'+html;
+    let html;try{html=oldConfig(n);}finally{for(const [k,v]of Object.entries(styleFields))if(v)schema[k]=v;}
+    const d=guide(n);
+    return `<div class="ng-edit-intro"><b>直接修改下方配置</b><p>${esc(d.how)}</p><p class="hint">保存配置会校验并保存当前画布；字段含义、完整输入输出结构和样例见「使用说明」。</p>${schema?.system_prompt?'<p class="ng-model-note">Prompt 和模型 JSON 约束可编辑并保存；当前使用内置规则，尚未接入模型。路径、阈值、回复风格等规则配置会影响运行。</p>':''}</div>`+html;
   };
   const oldPaths=configuredNodePaths;configuredNodePaths=function(n){const out=oldPaths(n),d=guide(n);if(n.config?.output_path&&d.outputSchema)schemaPathOptions(d.outputSchema,n.config.output_path,n.id+' · 节点输出',out);return out;};
   nodeContractSummary=function(n){const d=guide(n);return `<div class="path-contract" data-testid="node-contract-hint">读取 ${esc(d.read)} → 写入 ${esc(d.write)}。保存编排后，用本次运行输入验证。</div>`;};
