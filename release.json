@@ -1,0 +1,12 @@
+{
+  "version": "7.4.0",
+  "date": "2026-11-12",
+  "runtime": "browser-rules",
+  "features": [
+    "voc-tagging",
+    "voc-improvement",
+    "customer-support",
+    "support-multi-agent",
+    "language-style"
+  ]
+}
