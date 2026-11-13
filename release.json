@@ -1,6 +1,6 @@
 {
-  "version": "7.4.1",
-  "date": "2026-11-12",
+  "version": "7.4.2",
+  "date": "2026-11-13",
   "runtime": "browser-rules",
   "features": [
     "voc-tagging",
@@ -8,6 +8,8 @@
     "customer-support",
     "support-multi-agent",
     "language-style",
-    "editable-node-config"
+    "editable-node-config",
+    "complete-agent-catalog",
+    "image-video-canvas"
   ]
 }
