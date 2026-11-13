@@ -6375,7 +6375,9 @@ function renderGovList(){
   const rows = scoped.slice().sort((a, b) => {
     const aa = a.status === 'archived' ? 1 : 0, ab = b.status === 'archived' ? 1 : 0;
     const sa = SMOKE_RE.test(a.code) ? 1 : 0, sb = SMOKE_RE.test(b.code) ? 1 : 0;
-    return aa - ab || sa - sb || String(a.code).localeCompare(String(b.code));
+    const cases = ['demo.welcome','demo.image_video','demo.voc_tag','demo.voc_analysis','demo.customer_support','demo.support_orchestrator'];
+    const rank = code => cases.includes(code) ? cases.indexOf(code) : cases.length;
+    return aa - ab || sa - sb || rank(a.code) - rank(b.code) || String(a.code).localeCompare(String(b.code));
   });
   el.innerHTML = rows.map(a => {
     const smoke = SMOKE_RE.test(a.code);
@@ -8823,7 +8825,10 @@ $('#kProg').textContent = '0 节点';
 if($('#kProgHead'))$('#kProgHead').textContent = '0 节点';
 $('#runState').textContent='idle';
 $('#runState').className='badge run';
-(async () => {
+window.consoleReady = (async () => {
+  // Canvas extensions choose the initial view and install their node metadata.
+  // Wait for all script tags before loading that view or resolving deep links.
+  if(document.readyState === 'loading') await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, {once:true}));
   await probe();
   const authReady = await loadAuthStatus();
   if(MODE === 'live' && AUTH.enabled && !authReady) return;
@@ -8853,6 +8858,7 @@ $('#runState').className='badge run';
     if($('#view-account').classList.contains('active')) await loadAccountPage();
     toast('工作空间已连接');
     window.dispatchEvent(new Event('console-ready'));
+    return true;
   }
 })();
 /* ============ 人工审核模板治理 ============ */

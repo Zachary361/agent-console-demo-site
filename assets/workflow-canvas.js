@@ -87,6 +87,6 @@
   const originalTrace=renderTrace;renderTrace=function(id){originalTrace(id);showResult(tracePanel,TRACE_SELECTED_RUN_ID);};
   const originalReset=resetRun;resetRun=function(){originalReset();livePanel.hidden=true;livePanel.dataset.key='';};
   const originalWizardBody=wizBody;wizBody=function(){return originalWizardBody().replace('<start → end 最小编排图>','<所选模板生成的可编辑画布>');};
-  api.connect().then(()=>{$('#workflowConnection').textContent='匿名工作区已连接 · Agent、编排与运行自动保存';}).catch(e=>{$('#workflowConnection').textContent='后端连接失败：'+e.message;});
+  api.connect().catch(()=>{}); // Connection events retain any catalog recovery warning.
   go('govern',{noLoad:true});
 })();

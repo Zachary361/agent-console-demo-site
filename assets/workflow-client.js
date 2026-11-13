@@ -4,8 +4,31 @@
   const legacy=window.fetch.bind(window),api=window.VideoAPI;
   let ready;
   const notify=(ok,message)=>window.dispatchEvent(new CustomEvent('workflow-connection',{detail:{ok,message}}));
+  async function restoreVideoCase(){
+    // Use the existing shared service API so already-open tabs keep the same
+    // worker and database. Never overwrite saved Agents or graph versions.
+    const restore=async()=>{
+      const call=(path,method='GET',data)=>api.request('/api/video/console/v1'+path,method,data);
+      const code='demo.image_video',gid=code+'_graph',marker='builtin-image-video';
+      let agent=(await call('/agents')).items.find(a=>a.code===code);
+      if(!agent){
+        try{agent=await call('/agents','POST',{code,name:'图生视频',description:'图片输入 → 镜头参数 → 视频结果。可编辑画布；生成视频需要连接独立视频服务。',tags:[marker]});}
+        catch(e){if(e.status!==409)throw e;agent=await call('/agents/'+code);}
+      }
+      if(agent.versions?.length||!agent.tags?.includes(marker))return;
+      try{await call('/graphs/'+gid);}
+      catch(e){if(e.status!==404)throw e;await call('/graphs/'+gid,'PUT',{dsl:WorkflowCore.templateGraph(gid,'图生视频编排','video',code),owner_agent_code:code});}
+      await call('/agents/'+code+'/versions','POST',{graph_id:gid,input_schema:WorkflowCore.inputSchema,output_schema:WorkflowCore.outputSchema});
+    };
+    if(navigator.locks)await navigator.locks.request('agent-console-catalog:'+new URL('.',location.href).pathname,restore);
+    else await restore();
+  }
   async function connect(){
-    if(!ready)ready=api.connect().then(h=>{notify(true,window.PagesAPI?'浏览器工作区已连接 · 编排与运行记录保存在当前浏览器':'匿名工作区已连接 · Agent、编排与运行自动保存');return h;}).catch(e=>{ready=null;notify(false,'运行服务暂不可用：'+e.message);throw e;});
+    if(!ready)ready=api.connect().then(async h=>{
+      try{await restoreVideoCase();}
+      catch(e){notify(false,'工作区已连接，图生视频案例补全失败：'+e.message+'；可点击重新连接重试。');return h;}
+      notify(true,window.PagesAPI?'浏览器工作区已连接 · 编排与运行记录保存在当前浏览器':'匿名工作区已连接 · Agent、编排与运行自动保存');return h;
+    }).catch(e=>{ready=null;notify(false,'运行服务暂不可用：'+e.message);throw e;});
     return ready;
   }
   async function request(path,method='GET',body){await connect();return api.request('/api/video/console'+path,method,body);}
